@@ -362,47 +362,48 @@ h1, h2 { line-height: 1.2; }
   background: #f6ece7;
 }
 
-.kalender-legende { display: none; }
+/* Legende jetzt auf allen Bildschirmgrössen sichtbar: die Kästchen zeigen
+   den Namen aus dem Kalender-Event statt "belegt"/"angefragt", daher braucht
+   auch Desktop die Erklärung, was Grau/Gelb bedeutet. */
+.kalender-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.1rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--farbe-rand);
+  font-size: 0.8rem;
+  color: var(--farbe-text-schwach);
+}
+
+.legende-eintrag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legende-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--farbe-rand);
+  flex-shrink: 0;
+}
+
+.legende-swatch--frei { background: var(--farbe-flaeche); }
+
+.legende-swatch--angefragt {
+  background: var(--farbe-angefragt);
+  border-color: var(--farbe-angefragt-text);
+}
+
+.legende-swatch--belegt {
+  background: var(--farbe-belegt);
+  border-color: var(--farbe-belegt-text);
+}
 
 @media (max-width: 640px) {
   .tag-label { display: none; }
-
-  .kalender-legende {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem 1.1rem;
-    margin-top: 1rem;
-    padding-top: 0.9rem;
-    border-top: 1px solid var(--farbe-rand);
-    font-size: 0.8rem;
-    color: var(--farbe-text-schwach);
-  }
-
-  .legende-eintrag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .legende-swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 4px;
-    border: 1px solid var(--farbe-rand);
-    flex-shrink: 0;
-  }
-
-  .legende-swatch--frei { background: var(--farbe-flaeche); }
-
-  .legende-swatch--angefragt {
-    background: var(--farbe-angefragt);
-    border-color: var(--farbe-angefragt-text);
-  }
-
-  .legende-swatch--belegt {
-    background: var(--farbe-belegt);
-    border-color: var(--farbe-belegt-text);
-  }
 }
 
 /* Anfrageformular */

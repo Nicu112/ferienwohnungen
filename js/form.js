@@ -202,13 +202,10 @@ function absenden(hausKey, container) {
     tierart: state.tiere > 0 ? state.tierart.trim() : ""
   };
 
-  if (CONFIG.useMockData) {
-    // Testmodus: kein echter Mailversand, nur lokale Blockierung + Anzeige.
-    TEST_REQUESTS[hausKey].push({ von: state.von, bis: state.bis, status: "ANGEFRAGT" });
-  } else {
-    // TODO Phase 3: echten POST an CONFIG.haeuser[hausKey].appsScriptUrl senden
-    // (Body als text/plain mit JSON-Inhalt, siehe PLAN.md "Technischer Hinweis").
-  }
+  // TODO Phase 3: sobald appsScriptUrl gesetzt ist, echten POST dorthin senden
+  // (Body als text/plain mit JSON-Inhalt, siehe PLAN.md "Technischer Hinweis").
+  // Bis dahin: lokale Blockierung + Anzeige, kein echter Mailversand.
+  TEST_REQUESTS[hausKey].push({ von: state.von, bis: state.bis, status: "ANGEFRAGT", name });
 
   state.erfolgHtml = `
     <strong>${t("form.success.title")}</strong>

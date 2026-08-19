@@ -43,9 +43,14 @@ function hatEchtenKalender(hausKey) {
   return Boolean(haus.googleCalendarId && CONFIG.googleCalendarApiKey);
 }
 
+// Status kommt aus der Google-Calendar-Event-Farbe (nicht mehr aus dem
+// Titel) — so bleibt der Titel frei für den Namen, der auf der Website
+// angezeigt wird. Farbe in Google Calendar beim Event auswählen: Graphite
+// (Grau) = BELEGT, Banana (Gelb) = ANGEFRAGT. Events ohne diese Farbe
+// (Standardfarbe des Kalenders) werden ignoriert.
+const FARBE_STATUS_MAP = { 8: "BELEGT", 5: "ANGEFRAGT" };
+
 // Lädt (und cached pro Monat) die Events des echten "Verfügbarkeit"-Kalenders.
-// Erwartet, dass Apps Script bzw. ein Testeintrag den Titel "BELEGT" oder
-// "ANGEFRAGT" trägt (Gross-/Kleinschreibung egal) — alles andere wird ignoriert.
 async function ladeMonatsEvents(hausKey, jahr, monat) {
   const cacheKey = `${hausKey}-${jahr}-${monat}`;
   if (GOOGLE_EVENTS_CACHE[cacheKey]) return GOOGLE_EVENTS_CACHE[cacheKey];
@@ -71,9 +76,8 @@ async function ladeMonatsEvents(hausKey, jahr, monat) {
       // Google: end.date bei ganztägigen Events ist der Tag NACH dem letzten
       // belegten Tag (Checkout-Tag), unser "bis" ist dagegen inklusive.
       const bisISO = ev.end?.date ? isoMinusEinTag(bisRohISO) : bisRohISO;
-      const titel = (ev.summary || "").toUpperCase();
-      const status = titel.includes("BELEGT") ? "BELEGT" : titel.includes("ANGEFRAGT") ? "ANGEFRAGT" : null;
-      return status ? { von: vonISO, bis: bisISO, status } : null;
+      const status = FARBE_STATUS_MAP[ev.colorId];
+      return status ? { von: vonISO, bis: bisISO, status, name: ev.summary || "" } : null;
     })
     .filter(Boolean);
 
@@ -81,17 +85,27 @@ async function ladeMonatsEvents(hausKey, jahr, monat) {
   return events;
 }
 
-function ermittleTagesStatus(hausKey, isoDatum, echteEvents) {
+// Liefert Status + anzuzeigenden Namen für einen Tag in einem Rutsch (statt
+// zwei getrennter Durchläufe) — Name kommt vom Event, das den Status setzt;
+// fehlt er (z. B. alte MOCK_EVENTS ohne name-Feld), fällt render darauf
+// zurück, das generische Status-Wort zu zeigen.
+function ermittleTagesInfo(hausKey, isoDatum, echteEvents) {
   const basis = echteEvents || MOCK_EVENTS[hausKey] || [];
   const alle = [...basis, ...(TEST_REQUESTS[hausKey] || [])];
   let status = "FREI";
+  let name = "";
   for (const ev of alle) {
     if (isoDatum >= ev.von && isoDatum <= ev.bis) {
-      if (ev.status === "BELEGT") return "BELEGT"; // BELEGT hat Vorrang
+      if (ev.status === "BELEGT") return { status: "BELEGT", name: ev.name || "" }; // BELEGT hat Vorrang
       status = "ANGEFRAGT";
+      name = ev.name || "";
     }
   }
-  return status;
+  return { status, name };
+}
+
+function ermittleTagesStatus(hausKey, isoDatum, echteEvents) {
+  return ermittleTagesInfo(hausKey, isoDatum, echteEvents).status;
 }
 
 // Prüft, ob zwischen zwei Tagen (exklusive der Ränder) ein blockierter Tag liegt.
@@ -151,7 +165,7 @@ async function renderKalender(hausKey, container) {
   for (let tag = 1; tag <= anzahlTage; tag++) {
     const datum = new Date(jahr, monat, tag);
     const iso = zuISO(datum);
-    const status = ermittleTagesStatus(hausKey, iso, echteEvents);
+    const { status, name } = ermittleTagesInfo(hausKey, iso, echteEvents);
     const istAusgewaehlt =
       (state.start && iso === state.start) || (state.ende && iso === state.ende);
     const imBereich =
@@ -162,7 +176,11 @@ async function renderKalender(hausKey, container) {
     if (imBereich) klassen.push("tag--im-bereich");
 
     const klickbar = status === "FREI";
-    const label = status === "BELEGT" ? t("calendar.booked") : status === "ANGEFRAGT" ? t("calendar.requested") : "";
+    // Zeigt bevorzugt den Namen aus dem Event-Titel; nur wenn keiner
+    // hinterlegt ist (z. B. MOCK_EVENTS ohne name-Feld), das generische Wort.
+    const label = name
+      ? escapeHtml(name)
+      : status === "BELEGT" ? t("calendar.booked") : status === "ANGEFRAGT" ? t("calendar.requested") : "";
 
     html += `
       <button type="button" class="${klassen.join(" ")}" data-datum="${iso}" ${klickbar ? "" : "disabled"}>
@@ -174,9 +192,10 @@ async function renderKalender(hausKey, container) {
 
   html += `</div>`;
 
-  // Nur auf Mobile sichtbar (siehe CSS): dort verzichten die Kästchen auf den
-  // Text "belegt"/"angefragt" (verzieht sonst das Raster), stattdessen erklärt
-  // diese Legende die Farben.
+  // Kästchen zeigen den Namen statt "belegt"/"angefragt" — diese Legende
+  // erklärt, was Grau/Gelb bedeutet. Auf Mobile bleibt der Name-Text
+  // zusätzlich ausgeblendet (siehe CSS), da Namen unterschiedlich lang sind
+  // und das enge Raster sonst verziehen.
   html += `
     <div class="kalender-legende">
       <span class="legende-eintrag"><span class="legende-swatch legende-swatch--frei"></span>${t("calendar.free")}</span>

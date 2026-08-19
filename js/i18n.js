@@ -6,6 +6,7 @@ const I18N = {
     "calendar.requested": "Reservation angefragt",
     "calendar.booked": "belegt",
     "calendar.error.blocked": "In diesem Zeitraum liegt ein bereits belegter oder angefragter Tag. Bitte neu auswählen.",
+    "calendar.error.load": "Kalender konnte nicht geladen werden. Zeigt eventuell nicht alle Belegungen.",
     "calendar.hint.start": "Ankunftstag auswählen",
     "calendar.hint.end": "Abreisetag auswählen",
     "carousel.prev": "Vorheriges Bild",
