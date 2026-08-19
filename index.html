@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ferienwohnungen — Testversion</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="kopfzeile">
+  <span class="marke">Ferienwohnungen</span>
+  <nav class="sprachumschalter" aria-label="Sprache">
+    <button type="button" data-lang="de">DE</button>
+    <button type="button" data-lang="fr">FR</button>
+    <button type="button" data-lang="en">EN</button>
+  </nav>
+</header>
+
+<nav class="tabs">
+  <button type="button" class="tab-button active" data-tab="haus1"></button>
+  <button type="button" class="tab-button" data-tab="haus2"></button>
+</nav>
+
+<main>
+  <section class="haus-panel" data-haus="haus1">
+    <div class="standort" data-standort="haus1"></div>
+    <div class="karussell" data-karussell="haus1"></div>
+    <div class="haus-info" data-beschreibung="haus1"></div>
+    <div class="haus-info" data-preise="haus1"></div>
+    <div data-kalender="haus1"></div>
+    <div class="anfrage-box" data-anfrage="haus1" hidden></div>
+  </section>
+
+  <section class="haus-panel" data-haus="haus2" hidden>
+    <div class="standort" data-standort="haus2"></div>
+    <div class="karussell" data-karussell="haus2"></div>
+    <div class="haus-info" data-beschreibung="haus2"></div>
+    <div class="haus-info" data-preise="haus2"></div>
+    <div data-kalender="haus2"></div>
+    <div class="anfrage-box" data-anfrage="haus2" hidden></div>
+  </section>
+</main>
+
+<footer class="testhinweis">
+  Testversion mit Beispieldaten — echte Fotos, Texte, Kalender-/Verwalterdaten fehlen noch.
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/mock-data.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/content.js"></script>
+<script src="js/carousel.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/form.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
