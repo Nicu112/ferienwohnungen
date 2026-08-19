@@ -525,6 +525,24 @@ h1, h2 { line-height: 1.2; }
   cursor: not-allowed;
 }
 
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.8;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: spinner-drehen 0.7s linear infinite;
+}
+
+.spinner[hidden] { display: none; }
+
+@keyframes spinner-drehen {
+  to { transform: rotate(360deg); }
+}
+
 .anfrage-erfolg {
   margin-top: 1.25rem;
   padding: 0.9rem 1rem;

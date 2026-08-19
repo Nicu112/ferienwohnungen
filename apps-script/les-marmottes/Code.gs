@@ -105,6 +105,16 @@ function holeVorlage(schluessel, werte) {
   return text;
 }
 
+// Einmalig manuell ausführen (Apps-Script-Editor: Funktion "alleVorlagenAnlegen"
+// oben im Dropdown auswählen, dann "Ausführen"), um sofort alle 4
+// Vorlagendateien in Drive anzulegen, statt zu warten, bis jede Kombination
+// aus Aktion+Sprache einmal real vorgekommen ist.
+function alleVorlagenAnlegen() {
+  Object.keys(VORLAGEN_DATEIEN).forEach((schluessel) => {
+    holeVorlage(schluessel, { name: "", von: "", bis: "", haus: HAUS_NAME });
+  });
+}
+
 // Deutsches Datumsformat für Betreffzeilen, passend zur Website.
 function formatiereDatum(isoDatum) {
   const [j, m, t] = isoDatum.split("-");
@@ -143,6 +153,12 @@ function betreffAblehnen(sprache, name, von, bis) {
   return sprache === "fr"
     ? `Refus de la demande de réservation ${HAUS_NAME} – ${name}, ${formatiereDatum(von)} – ${formatiereDatum(bis)}`
     : `Ablehnung Reservationsanfrage ${HAUS_NAME} – ${name}, ${formatiereDatum(von)} – ${formatiereDatum(bis)}`;
+}
+
+function betreffAnfrageEingegangen(sprache, name, von, bis) {
+  return sprache === "fr"
+    ? `Votre demande de réservation ${HAUS_NAME} – ${name}, ${formatiereDatum(von)} – ${formatiereDatum(bis)}`
+    : `Deine Reservationsanfrage ${HAUS_NAME} – ${name}, ${formatiereDatum(von)} – ${formatiereDatum(bis)}`;
 }
 
 function doPost(e) {
@@ -201,6 +217,37 @@ function doPost(e) {
     htmlBody
   });
 
+  // Gleicher Inhalt, ohne Zusagen/Ablehnen-Buttons, als Bestätigung an den
+  // Gast, dass die Anfrage angekommen ist — in der Sprache, in der er die
+  // Website benutzt hat.
+  const spracheGast = sprache === "fr" ? "fr" : "de";
+  const gastHtmlBody =
+    spracheGast === "fr"
+      ? `
+        <p>Votre demande de réservation pour ${HAUS_NAME} a bien été transmise :</p>
+        <ul>
+          <li><strong>Nom :</strong> ${name}</li>
+          <li><strong>Période :</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
+          <li><strong>Adultes :</strong> ${erwachsene}, <strong>Enfants :</strong> ${kinder}, <strong>Animaux :</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
+        </ul>
+        <p>Vous recevrez une réponse dès que votre demande aura été traitée.</p>
+      `
+      : `
+        <p>Deine Reservationsanfrage für ${HAUS_NAME} wurde übermittelt:</p>
+        <ul>
+          <li><strong>Name:</strong> ${name}</li>
+          <li><strong>Zeitspanne:</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
+          <li><strong>Erwachsene:</strong> ${erwachsene}, <strong>Kinder:</strong> ${kinder}, <strong>Tiere:</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
+        </ul>
+        <p>Du erhältst eine Rückmeldung, sobald deine Anfrage bearbeitet wurde.</p>
+      `;
+
+  MailApp.sendEmail({
+    to: email,
+    subject: betreffAnfrageEingegangen(spracheGast, name, von, bis),
+    htmlBody: gastHtmlBody
+  });
+
   return ContentService.createTextOutput(JSON.stringify({ ok: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }
@@ -250,6 +297,11 @@ function doGet(e) {
   }
 
   if (action === "ablehnen") {
+    // Tage wieder freigeben: den "Name (ANGEFRAGT)"-Eintrag löschen.
+    const kalender = getKalender();
+    const event = kalender.getEventById(eventId);
+    if (event) event.deleteEvent();
+
     blatt.getRange(zeile, 13).setValue("abgelehnt"); // Spalte "status"
     const text = holeVorlage(`ablehnen-${spracheKlein}`, platzhalter);
     const mailtoLink =

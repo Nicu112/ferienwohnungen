@@ -86,7 +86,10 @@ function renderFormular(hausKey, container) {
         autocomplete="tel-national" required value="${escapeHtml(telefonAnzeige(state))}">
     </div>
     <div class="honeypot" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
-    <button type="button" class="anfrage-submit" data-submit disabled data-i18n="form.submit"></button>
+    <button type="button" class="anfrage-submit" data-submit disabled>
+      <span data-submit-text data-i18n="form.submit"></span>
+      <span class="spinner" data-spinner hidden></span>
+    </button>
     <div class="anfrage-erfolg" data-erfolg hidden></div>
   `;
 
@@ -208,7 +211,11 @@ async function absenden(hausKey, container) {
 
   const appsScriptUrl = CONFIG.haeuser[hausKey].appsScriptUrl;
   const submitBtn = container.querySelector("[data-submit]");
+  const submitText = container.querySelector("[data-submit-text]");
+  const spinner = container.querySelector("[data-spinner]");
   submitBtn.disabled = true;
+  submitText.hidden = true;
+  spinner.hidden = false;
 
   if (appsScriptUrl) {
     // Body bewusst als text/plain gesendet (Apps-Script-CORS-Kniff, siehe
@@ -225,6 +232,8 @@ async function absenden(hausKey, container) {
     } catch (err) {
       console.error("Anfrage konnte nicht gesendet werden:", err);
       submitBtn.disabled = false;
+      submitText.hidden = false;
+      spinner.hidden = true;
       return;
     }
     state.erfolgHtml = `
@@ -244,6 +253,7 @@ async function absenden(hausKey, container) {
     `;
   }
   state.abgeschickt = true;
+  spinner.hidden = true;
 
   const erfolgBox = container.querySelector("[data-erfolg]");
   erfolgBox.hidden = false;
