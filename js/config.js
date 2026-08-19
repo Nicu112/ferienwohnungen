@@ -4,7 +4,7 @@
 // zurückfällt — kein globaler Schalter mehr nötig, jedes Haus kann einzeln
 // umgestellt werden, sobald sein Kalender eingerichtet ist.
 const CONFIG = {
-  googleCalendarApiKey: "AIzaSyBBi-leBWKdw4bKlZ38CwbdGKX8k3tcgY0", // Lokal für Tests; auf GitHub leer
+  googleCalendarApiKey: "AIzaSyAfDcKGwECtItLC5AlYFb3jnoJpmQM6_YY", // Lokal für Tests; auf GitHub leer
 
   haeuser: {
     haus1: {
