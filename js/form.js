@@ -126,7 +126,7 @@ function renderFormular(hausKey, container) {
   // Nach einem Neu-Rendern (z. B. Sprachwechsel) den "bereits abgeschickt"-
   // Zustand wiederherstellen, statt ein leeres, aktives Formular zu zeigen.
   if (state.abgeschickt) {
-    container.querySelector("[data-submit]").disabled = true;
+    container.querySelector("[data-submit]").hidden = true;
     container.querySelectorAll("[data-feld-input]").forEach((el) => (el.disabled = true));
     container.querySelectorAll("[data-aktion]").forEach((el) => (el.disabled = true));
     const erfolgBox = container.querySelector("[data-erfolg]");
@@ -253,7 +253,7 @@ async function absenden(hausKey, container) {
     `;
   }
   state.abgeschickt = true;
-  spinner.hidden = true;
+  submitBtn.hidden = true;
 
   const erfolgBox = container.querySelector("[data-erfolg]");
   erfolgBox.hidden = false;
