@@ -338,7 +338,7 @@ h1, h2 { line-height: 1.2; }
 .tag--vergangen {
   color: var(--farbe-text-schwach);
   opacity: 0.4;
-  cursor: not-allowed;
+  cursor: default;
 }
 
 .tag-label { font-size: 0.62rem; }
