@@ -335,6 +335,12 @@ h1, h2 { line-height: 1.2; }
 
 .tag--frei[disabled] { cursor: not-allowed; }
 
+.tag--vergangen {
+  color: var(--farbe-text-schwach);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .tag-label { font-size: 0.62rem; }
 
 .tag--ausgewaehlt {
