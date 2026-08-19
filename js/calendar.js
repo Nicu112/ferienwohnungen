@@ -43,12 +43,21 @@ function hatEchtenKalender(hausKey) {
   return Boolean(haus.googleCalendarId && CONFIG.googleCalendarApiKey);
 }
 
-// Status kommt aus der Google-Calendar-Event-Farbe (nicht mehr aus dem
-// Titel) — so bleibt der Titel frei für den Namen, der auf der Website
-// angezeigt wird. Farbe in Google Calendar beim Event auswählen: Graphite
-// (Grau) = BELEGT, Banana (Gelb) = ANGEFRAGT. Events ohne diese Farbe
-// (Standardfarbe des Kalenders) werden ignoriert.
-const FARBE_STATUS_MAP = { 8: "BELEGT", 5: "ANGEFRAGT" };
+// Event-Titel im Format "Name (BELEGT)" bzw. "Name (ANGEFRAGT)" — liefert
+// Name und Status in einem Rutsch. Alte Test-Events mit reinem "BELEGT"/
+// "ANGEFRAGT" als Titel (ohne Klammer-Name) funktionieren als Fallback
+// weiterhin, zeigen dann aber keinen Namen.
+function parseEventTitel(titelRoh) {
+  const titel = (titelRoh || "").trim();
+  const klammerMatch = titel.match(/^(.*?)\s*\((belegt|angefragt)\)\s*$/i);
+  if (klammerMatch) {
+    return { name: klammerMatch[1].trim(), status: klammerMatch[2].toUpperCase() };
+  }
+  const oben = titel.toUpperCase();
+  if (oben.includes("BELEGT")) return { name: "", status: "BELEGT" };
+  if (oben.includes("ANGEFRAGT")) return { name: "", status: "ANGEFRAGT" };
+  return { name: "", status: null };
+}
 
 // Lädt (und cached pro Monat) die Events des echten "Verfügbarkeit"-Kalenders.
 async function ladeMonatsEvents(hausKey, jahr, monat) {
@@ -76,8 +85,8 @@ async function ladeMonatsEvents(hausKey, jahr, monat) {
       // Google: end.date bei ganztägigen Events ist der Tag NACH dem letzten
       // belegten Tag (Checkout-Tag), unser "bis" ist dagegen inklusive.
       const bisISO = ev.end?.date ? isoMinusEinTag(bisRohISO) : bisRohISO;
-      const status = FARBE_STATUS_MAP[ev.colorId];
-      return status ? { von: vonISO, bis: bisISO, status, name: ev.summary || "" } : null;
+      const { name, status } = parseEventTitel(ev.summary);
+      return status ? { von: vonISO, bis: bisISO, status, name } : null;
     })
     .filter(Boolean);
 
