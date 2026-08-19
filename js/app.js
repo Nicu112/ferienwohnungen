@@ -65,12 +65,6 @@ function initTabs() {
     if (CONFIG.haeuser[hausKey].aktiv === false) btn.hidden = true;
   });
 
-  const aktiveTabs = [...tabButtons].filter((btn) => !btn.hidden);
-  // Eine Tab-Leiste mit nur einem sichtbaren Button hätte keine Funktion.
-  if (aktiveTabs.length <= 1) {
-    document.querySelector(".tabs").hidden = true;
-  }
-
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const ziel = btn.getAttribute("data-tab");
