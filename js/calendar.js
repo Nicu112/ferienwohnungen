@@ -1,10 +1,13 @@
-// Eigenes Monatsraster (kein iFrame). Liest im Testmodus MOCK_EVENTS +
-// TEST_REQUESTS; ab Phase 1 hier den echten fetch() gegen die Calendar API
-// einsetzen (Stelle markiert unten) und CONFIG.useMockData auf false stellen.
+// Eigenes Monatsraster (kein iFrame). Pro Haus mit hinterlegter
+// googleCalendarId wird der echte öffentliche "Verfügbarkeit"-Kalender per
+// Calendar API gelesen; Häuser ohne googleCalendarId laufen weiter auf
+// MOCK_EVENTS. TEST_REQUESTS (clientseitige Testanfragen) werden in beiden
+// Fällen zusätzlich überlagert.
 
 const WOCHENTAGE_MO_START = [1, 2, 3, 4, 5, 6, 0]; // Mo..So, JS: So=0
 
 const HAUS_STATE = {};
+const GOOGLE_EVENTS_CACHE = {};
 
 function initHausState(hausKey) {
   const heute = new Date();
@@ -25,8 +28,62 @@ function zuISO(datum) {
   return `${j}-${m}-${t}`;
 }
 
-function ermittleTagesStatus(hausKey, isoDatum) {
-  const alle = [...(MOCK_EVENTS[hausKey] || []), ...(TEST_REQUESTS[hausKey] || [])];
+// Wie zuISO(), nur einen Tag zurück — für die Umrechnung des exklusiven
+// end.date ganztägiger Google-Events (siehe ladeMonatsEvents). Bewusst über
+// lokale Datumsteile statt new Date(isoString), das ginge wieder über UTC.
+function isoMinusEinTag(isoDatum) {
+  const [j, m, t] = isoDatum.split("-").map(Number);
+  const datum = new Date(j, m - 1, t);
+  datum.setDate(datum.getDate() - 1);
+  return zuISO(datum);
+}
+
+function hatEchtenKalender(hausKey) {
+  const haus = CONFIG.haeuser[hausKey];
+  return Boolean(haus.googleCalendarId && CONFIG.googleCalendarApiKey);
+}
+
+// Lädt (und cached pro Monat) die Events des echten "Verfügbarkeit"-Kalenders.
+// Erwartet, dass Apps Script bzw. ein Testeintrag den Titel "BELEGT" oder
+// "ANGEFRAGT" trägt (Gross-/Kleinschreibung egal) — alles andere wird ignoriert.
+async function ladeMonatsEvents(hausKey, jahr, monat) {
+  const cacheKey = `${hausKey}-${jahr}-${monat}`;
+  if (GOOGLE_EVENTS_CACHE[cacheKey]) return GOOGLE_EVENTS_CACHE[cacheKey];
+
+  const haus = CONFIG.haeuser[hausKey];
+  const timeMin = new Date(jahr, monat, 1).toISOString();
+  const timeMax = new Date(jahr, monat + 1, 1).toISOString();
+  const url =
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(haus.googleCalendarId)}/events` +
+    `?key=${encodeURIComponent(CONFIG.googleCalendarApiKey)}` +
+    `&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}` +
+    `&singleEvents=true&orderBy=startTime`;
+
+  const antwort = await fetch(url);
+  if (!antwort.ok) throw new Error(`Google Calendar API: ${antwort.status}`);
+  const daten = await antwort.json();
+
+  const events = (daten.items || [])
+    .map((ev) => {
+      const vonISO = ev.start?.date || (ev.start?.dateTime || "").slice(0, 10);
+      const bisRohISO = ev.end?.date || (ev.end?.dateTime || "").slice(0, 10);
+      if (!vonISO || !bisRohISO) return null;
+      // Google: end.date bei ganztägigen Events ist der Tag NACH dem letzten
+      // belegten Tag (Checkout-Tag), unser "bis" ist dagegen inklusive.
+      const bisISO = ev.end?.date ? isoMinusEinTag(bisRohISO) : bisRohISO;
+      const titel = (ev.summary || "").toUpperCase();
+      const status = titel.includes("BELEGT") ? "BELEGT" : titel.includes("ANGEFRAGT") ? "ANGEFRAGT" : null;
+      return status ? { von: vonISO, bis: bisISO, status } : null;
+    })
+    .filter(Boolean);
+
+  GOOGLE_EVENTS_CACHE[cacheKey] = events;
+  return events;
+}
+
+function ermittleTagesStatus(hausKey, isoDatum, echteEvents) {
+  const basis = echteEvents || MOCK_EVENTS[hausKey] || [];
+  const alle = [...basis, ...(TEST_REQUESTS[hausKey] || [])];
   let status = "FREI";
   for (const ev of alle) {
     if (isoDatum >= ev.von && isoDatum <= ev.bis) {
@@ -38,20 +95,37 @@ function ermittleTagesStatus(hausKey, isoDatum) {
 }
 
 // Prüft, ob zwischen zwei Tagen (exklusive der Ränder) ein blockierter Tag liegt.
-function hatBlockiertenTagDazwischen(hausKey, startISO, endeISO) {
+function hatBlockiertenTagDazwischen(hausKey, startISO, endeISO, echteEvents) {
   const start = new Date(startISO);
   const ende = new Date(endeISO);
   for (let d = new Date(start); d < ende; d.setDate(d.getDate() + 1)) {
     const iso = zuISO(d);
     if (iso === startISO) continue;
-    if (ermittleTagesStatus(hausKey, iso) !== "FREI") return true;
+    if (ermittleTagesStatus(hausKey, iso, echteEvents) !== "FREI") return true;
   }
   return false;
 }
 
-function renderKalender(hausKey, container) {
+async function renderKalender(hausKey, container) {
   const state = HAUS_STATE[hausKey];
   const { jahr, monat } = state;
+
+  let echteEvents;
+  let ladeFehler = false;
+  if (hatEchtenKalender(hausKey)) {
+    try {
+      echteEvents = await ladeMonatsEvents(hausKey, jahr, monat);
+    } catch (err) {
+      console.error("Google Calendar konnte nicht geladen werden:", err);
+      ladeFehler = true;
+      echteEvents = [];
+    }
+  }
+
+  // Zwischen dem await oben und hier kann der Nutzer schon weitergeklickt
+  // haben (anderer Monat/Tab) — dann ist diese Antwort veraltet, verwerfen.
+  if (HAUS_STATE[hausKey] !== state || state.jahr !== jahr || state.monat !== monat) return;
+
   const ersterTag = new Date(jahr, monat, 1);
   const anzahlTage = new Date(jahr, monat + 1, 0).getDate();
   const startOffset = WOCHENTAGE_MO_START.indexOf(ersterTag.getDay());
@@ -66,6 +140,7 @@ function renderKalender(hausKey, container) {
     </div>
     <div class="kalender-hinweis" data-hinweis>${state.fehler ? "" : state.start ? t("calendar.hint.end") : t("calendar.hint.start")}</div>
     ${state.fehler ? `<div class="kalender-fehler" data-fehler>${t("calendar.error.blocked")}</div>` : ""}
+    ${ladeFehler ? `<div class="kalender-fehler" data-fehler>${t("calendar.error.load")}</div>` : ""}
     <div class="kalender-raster">
   `;
 
@@ -76,7 +151,7 @@ function renderKalender(hausKey, container) {
   for (let tag = 1; tag <= anzahlTage; tag++) {
     const datum = new Date(jahr, monat, tag);
     const iso = zuISO(datum);
-    const status = ermittleTagesStatus(hausKey, iso);
+    const status = ermittleTagesStatus(hausKey, iso, echteEvents);
     const istAusgewaehlt =
       (state.start && iso === state.start) || (state.ende && iso === state.ende);
     const imBereich =

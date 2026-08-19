@@ -1,15 +1,16 @@
-// Alle Konten-/Kalender-Angaben an einem Ort. Sobald diese Werte echt sind,
-// useMockData auf false stellen — der Rest des Codes ändert sich nicht.
+// Alle Konten-/Kalender-Angaben an einem Ort. Pro Haus entscheidet allein das
+// Vorhandensein von googleCalendarId (+ ein gesetzter googleCalendarApiKey),
+// ob calendar.js echte Google-Calendar-Daten lädt oder auf MOCK_EVENTS
+// zurückfällt — kein globaler Schalter mehr nötig, jedes Haus kann einzeln
+// umgestellt werden, sobald sein Kalender eingerichtet ist.
 const CONFIG = {
-  useMockData: true,
-
-  googleCalendarApiKey: "", // TODO Phase 0: Calendar-API-Key aus Google Cloud Console
+  googleCalendarApiKey: "", // TODO: Im Produktions-Deploy setzen oder über Env-Var laden
 
   haeuser: {
     haus1: {
       name: "Les Marmottes",
       standort: "Arolla",
-      googleCalendarId: "", // TODO: ID des öffentlichen Kalenders "Verfügbarkeit"
+      googleCalendarId: "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com",
       appsScriptUrl: "", // TODO Phase 3: Web-App-URL des Apps Script
       verwalterEmail: "lesmarmottesb@gmail.com",
       bilder: [], // TODO: echte Bild-URLs eintragen, z. B. ["img/haus1-1.jpg", ...] — leer lassen für Platzhalter
