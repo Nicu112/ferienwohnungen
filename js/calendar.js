@@ -1,8 +1,9 @@
 // Eigenes Monatsraster (kein iFrame). Pro Haus mit hinterlegter
-// googleCalendarId wird der echte öffentliche "Verfügbarkeit"-Kalender per
-// Calendar API gelesen; Häuser ohne googleCalendarId laufen weiter auf
-// MOCK_EVENTS. TEST_REQUESTS (clientseitige Testanfragen) werden in beiden
-// Fällen zusätzlich überlagert.
+// googleCalendarId wird genau ein Google-Kalender per Calendar API gelesen
+// — derselbe, in den auch Apps Script schreibt und in dem der Admin direkt
+// eigene Termine anlegen kann (siehe parseEventTitel). Häuser ohne
+// googleCalendarId laufen weiter auf MOCK_EVENTS. TEST_REQUESTS
+// (clientseitige Testanfragen) werden in beiden Fällen zusätzlich überlagert.
 
 const WOCHENTAGE_MO_START = [1, 2, 3, 4, 5, 6, 0]; // Mo..So, JS: So=0
 
@@ -43,20 +44,23 @@ function hatEchtenKalender(hausKey) {
   return Boolean(haus.googleCalendarId && CONFIG.googleCalendarApiKey);
 }
 
-// Event-Titel im Format "Name (BELEGT)" bzw. "Name (ANGEFRAGT)" — liefert
-// Name und Status in einem Rutsch. Alte Test-Events mit reinem "BELEGT"/
-// "ANGEFRAGT" als Titel (ohne Klammer-Name) funktionieren als Fallback
-// weiterhin, zeigen dann aber keinen Namen.
+// JEDES Event im Kalender blockiert die Tage automatisch als "belegt" —
+// der Admin kann direkt in Google Calendar einen Termin mit beliebigem
+// Titel eintragen (z. B. "Renovation", "Hans"), kein spezielles Format
+// nötig. Einzige Ausnahme: ein Titel, der auf "(ANGEFRAGT)" endet, gilt als
+// offene Buchungsanfrage (gelb) — das trägt das Formular auf der Website
+// automatisch so ein. Ein optionales "(BELEGT)"-Suffix aus älteren
+// Einträgen wird nur für die Anzeige entfernt, ist aber nicht mehr nötig.
 function parseEventTitel(titelRoh) {
   const titel = (titelRoh || "").trim();
-  const klammerMatch = titel.match(/^(.*?)\s*\((belegt|angefragt)\)\s*$/i);
-  if (klammerMatch) {
-    return { name: klammerMatch[1].trim(), status: klammerMatch[2].toUpperCase() };
+
+  const angefragtMatch = titel.match(/^(.*?)\s*\(angefragt\)\s*$/i);
+  if (angefragtMatch) {
+    return { name: angefragtMatch[1].trim(), status: "ANGEFRAGT" };
   }
-  const oben = titel.toUpperCase();
-  if (oben.includes("BELEGT")) return { name: "", status: "BELEGT" };
-  if (oben.includes("ANGEFRAGT")) return { name: "", status: "ANGEFRAGT" };
-  return { name: "", status: null };
+
+  const belegtMatch = titel.match(/^(.*?)\s*\(belegt\)\s*$/i);
+  return { name: belegtMatch ? belegtMatch[1].trim() : titel, status: "BELEGT" };
 }
 
 // Lädt (und cached pro Monat) die Events des echten "Verfügbarkeit"-Kalenders.
@@ -86,7 +90,7 @@ async function ladeMonatsEvents(hausKey, jahr, monat) {
       // belegten Tag (Checkout-Tag), unser "bis" ist dagegen inklusive.
       const bisISO = ev.end?.date ? isoMinusEinTag(bisRohISO) : bisRohISO;
       const { name, status } = parseEventTitel(ev.summary);
-      return status ? { von: vonISO, bis: bisISO, status, name } : null;
+      return { von: vonISO, bis: bisISO, status, name };
     })
     .filter(Boolean);
 

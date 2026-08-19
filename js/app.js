@@ -12,8 +12,6 @@ function init() {
     renderKarussell(hausKey, karussellContainer);
     const beschreibungContainer = document.querySelector(`[data-beschreibung="${hausKey}"]`);
     renderBeschreibung(hausKey, beschreibungContainer);
-    const preiseContainer = document.querySelector(`[data-preise="${hausKey}"]`);
-    renderPreise(hausKey, preiseContainer);
     const kalenderContainer = document.querySelector(`[data-kalender="${hausKey}"]`);
     renderKalender(hausKey, kalenderContainer);
   });
@@ -43,8 +41,6 @@ function init() {
       renderKarussell(hausKey, karussellContainer); // Index bleibt erhalten, nur Beschriftungen ändern sich
       const beschreibungContainer = document.querySelector(`[data-beschreibung="${hausKey}"]`);
       renderBeschreibung(hausKey, beschreibungContainer);
-      const preiseContainer = document.querySelector(`[data-preise="${hausKey}"]`);
-      renderPreise(hausKey, preiseContainer);
       const kalenderContainer = document.querySelector(`[data-kalender="${hausKey}"]`);
       renderKalender(hausKey, kalenderContainer);
       const anfrageContainer = document.querySelector(`[data-anfrage="${hausKey}"]`);
@@ -62,8 +58,18 @@ function initTabs() {
   // Echte Hausnamen sind Eigennamen und werden nicht übersetzt (anders als
   // die übrige Oberfläche), deshalb direkt aus CONFIG statt via data-i18n.
   tabButtons.forEach((btn) => {
-    btn.textContent = CONFIG.haeuser[btn.getAttribute("data-tab")].name;
+    const hausKey = btn.getAttribute("data-tab");
+    btn.textContent = CONFIG.haeuser[hausKey].name;
+    // "aktiv: false" blendet ein Haus komplett aus der Navigation aus (Code/
+    // Config bleiben unverändert, jederzeit mit "aktiv: true" reaktivierbar).
+    if (CONFIG.haeuser[hausKey].aktiv === false) btn.hidden = true;
   });
+
+  const aktiveTabs = [...tabButtons].filter((btn) => !btn.hidden);
+  // Eine Tab-Leiste mit nur einem sichtbaren Button hätte keine Funktion.
+  if (aktiveTabs.length <= 1) {
+    document.querySelector(".tabs").hidden = true;
+  }
 
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {

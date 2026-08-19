@@ -181,7 +181,7 @@ function zeigeFormular(hausKey, container, von, bis) {
     `${t("form.range")}: ${formatiereDatum(von)} – ${formatiereDatum(bis)}`;
 }
 
-function absenden(hausKey, container) {
+async function absenden(hausKey, container) {
   const state = FORM_STATE[hausKey];
   const name = state.name.trim();
   const email = state.email.trim();
@@ -199,27 +199,55 @@ function absenden(hausKey, container) {
     erwachsene: state.erwachsene,
     kinder: state.kinder,
     tiere: state.tiere,
-    tierart: state.tiere > 0 ? state.tierart.trim() : ""
+    tierart: state.tiere > 0 ? state.tierart.trim() : "",
+    // Sprache der Seite zum Zeitpunkt der Anfrage — Apps Script nutzt sie
+    // später, um Zusagen/Ablehnen-Antwortmail in der richtigen Sprache zu
+    // öffnen.
+    sprache: AKTUELLE_SPRACHE
   };
 
-  // TODO Phase 3: sobald appsScriptUrl gesetzt ist, echten POST dorthin senden
-  // (Body als text/plain mit JSON-Inhalt, siehe PLAN.md "Technischer Hinweis").
-  // Bis dahin: lokale Blockierung + Anzeige, kein echter Mailversand.
-  TEST_REQUESTS[hausKey].push({ von: state.von, bis: state.bis, status: "ANGEFRAGT", name });
+  const appsScriptUrl = CONFIG.haeuser[hausKey].appsScriptUrl;
+  const submitBtn = container.querySelector("[data-submit]");
+  submitBtn.disabled = true;
 
-  state.erfolgHtml = `
-    <strong>${t("form.success.title")}</strong>
-    <p>${t("form.success.body")}</p>
-    <p><strong>An:</strong> ${CONFIG.haeuser[hausKey].verwalterEmail || "(noch keine Verwalter-Adresse hinterlegt)"}</p>
-    <p><strong>Betreff:</strong> Reservationsanfrage ${CONFIG.haeuser[hausKey].name} – ${name}, ${formatiereDatum(state.von)} – ${formatiereDatum(state.bis)}</p>
-    <pre>${JSON.stringify(zusammenfassung, null, 2)}</pre>
-  `;
+  if (appsScriptUrl) {
+    // Body bewusst als text/plain gesendet (Apps-Script-CORS-Kniff, siehe
+    // PLAN.md "Technischer Hinweis"). Der Kalender zeigt die neue Anfrage
+    // erst nach dem nächsten Neuladen — Apps Script legt den echten
+    // ANGEFRAGT-Eintrag im öffentlichen Kalender an, keine lokale Simulation
+    // mehr nötig.
+    try {
+      await fetch(appsScriptUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(zusammenfassung)
+      });
+    } catch (err) {
+      console.error("Anfrage konnte nicht gesendet werden:", err);
+      submitBtn.disabled = false;
+      return;
+    }
+    state.erfolgHtml = `
+      <strong>${t("form.success.title.real")}</strong>
+      <p>${t("form.success.body.real")}</p>
+    `;
+  } else {
+    // Kein Apps Script für dieses Haus hinterlegt (noch nicht eingerichtet):
+    // lokale Test-Blockierung + Anzeige, kein echter Mailversand.
+    TEST_REQUESTS[hausKey].push({ von: state.von, bis: state.bis, status: "ANGEFRAGT", name });
+    state.erfolgHtml = `
+      <strong>${t("form.success.title")}</strong>
+      <p>${t("form.success.body")}</p>
+      <p><strong>An:</strong> ${CONFIG.haeuser[hausKey].verwalterEmail || "(noch keine Verwalter-Adresse hinterlegt)"}</p>
+      <p><strong>Betreff:</strong> Reservationsanfrage ${CONFIG.haeuser[hausKey].name} – ${name}, ${formatiereDatum(state.von)} – ${formatiereDatum(state.bis)}</p>
+      <pre>${JSON.stringify(zusammenfassung, null, 2)}</pre>
+    `;
+  }
   state.abgeschickt = true;
 
   const erfolgBox = container.querySelector("[data-erfolg]");
   erfolgBox.hidden = false;
   erfolgBox.innerHTML = state.erfolgHtml;
-  container.querySelector("[data-submit]").disabled = true;
   container.querySelectorAll("[data-feld-input]").forEach((el) => (el.disabled = true));
   container.querySelectorAll("[data-aktion]").forEach((el) => (el.disabled = true));
 

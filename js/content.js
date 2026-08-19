@@ -1,45 +1,27 @@
-// Platzhalter-Inhalte für Karussell und Beschreibungstext pro Haus.
-// Echte Fotos: URLs in CONFIG.haeuser[haus].bilder eintragen (siehe config.js),
-// ersetzt automatisch die Platzhalter-Kacheln unten. Bis dahin erscheinen
-// gestaltete SVG-Kacheln als Platzhalter, keine externen Bild-Requests.
-
-const HAUS_BESCHREIBUNG = {
-  haus1: {
-    de: "Beschreibung folgt. Hier steht später ein Text über Lage, Ausstattung und Besonderheiten von Les Marmottes.",
-    fr: "Description à venir. Un texte sur l'emplacement, l'équipement et les particularités de Les Marmottes suivra ici.",
-    en: "Description coming soon. A text about the location, amenities and highlights of Les Marmottes will go here."
-  },
-  haus2: {
-    de: "Beschreibung folgt. Hier steht später ein Text über Lage, Ausstattung und Besonderheiten von Les Deux Cypres.",
-    fr: "Description à venir. Un texte sur l'emplacement, l'équipement et les particularités de Les Deux Cypres suivra ici.",
-    en: "Description coming soon. A text about the location, amenities and highlights of Les Deux Cypres will go here."
-  }
-};
+// Beschreibungstexte kommen aus beschreibungen/{ordner}/{sprache}.txt (siehe
+// CONFIG.haeuser[haus].ordner) — direkt in diesen Dateien bearbeitbar, ohne
+// Code anzufassen. Bilder: URLs in CONFIG.haeuser[haus].bilder (siehe
+// config.js), ersetzt automatisch die Platzhalter-Kacheln unten.
 
 const KARUSSELL_ANZAHL_PLATZHALTER = 5;
 
-function renderBeschreibung(hausKey, container) {
-  const text = HAUS_BESCHREIBUNG[hausKey][AKTUELLE_SPRACHE] || HAUS_BESCHREIBUNG[hausKey].de;
+const BESCHREIBUNG_FALLBACK = {
+  de: "Beschreibung folgt.",
+  fr: "Description à venir."
+};
+
+async function renderBeschreibung(hausKey, container) {
+  const ordner = CONFIG.haeuser[hausKey].ordner;
+  let text = BESCHREIBUNG_FALLBACK[AKTUELLE_SPRACHE] || BESCHREIBUNG_FALLBACK.de;
+  try {
+    const antwort = await fetch(`beschreibungen/${ordner}/${AKTUELLE_SPRACHE}.txt`);
+    if (antwort.ok) text = (await antwort.text()).trim();
+  } catch (err) {
+    console.error("Beschreibung konnte nicht geladen werden:", err);
+  }
   container.innerHTML = `
     <h2 data-i18n="info.title"></h2>
     <p>${escapeHtml(text)}</p>
-  `;
-  wendeUebersetzungAn();
-}
-
-function formatierePreis(betrag) {
-  return betrag > 0 ? `CHF ${betrag}.–` : "–";
-}
-
-function renderPreise(hausKey, container) {
-  const preise = CONFIG.haeuser[hausKey].preise;
-  container.innerHTML = `
-    <h2 data-i18n="preise.title"></h2>
-    <ul class="preise-liste">
-      <li><span data-i18n="preise.erwachsene"></span><strong>${formatierePreis(preise.erwachsene)}</strong></li>
-      <li><span data-i18n="preise.kind"></span><strong>${formatierePreis(preise.kind)}</strong></li>
-      <li><span data-i18n="preise.reinigung"></span><strong>${formatierePreis(preise.reinigung)}</strong></li>
-    </ul>
   `;
   wendeUebersetzungAn();
 }

@@ -81,6 +81,10 @@ h1, h2 { line-height: 1.2; }
   margin-bottom: 1.5rem;
 }
 
+.tabs[hidden] {
+  display: none;
+}
+
 .tab-button {
   background: var(--farbe-flaeche);
   border: 1px solid var(--farbe-rand);
@@ -237,26 +241,6 @@ h1, h2 { line-height: 1.2; }
   margin-bottom: 0;
   color: var(--farbe-text-schwach);
 }
-
-.preise-liste {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.preise-liste li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.5rem 0;
-  border-top: 1px solid var(--farbe-rand);
-  color: var(--farbe-text-schwach);
-}
-
-.preise-liste li:first-child { border-top: none; }
-
-.preise-liste strong { color: var(--farbe-text); }
 
 /* Kalender */
 
@@ -547,13 +531,5 @@ h1, h2 { line-height: 1.2; }
 .anfrage-erfolg pre {
   white-space: pre-wrap;
   font-size: 0.75rem;
-  color: var(--farbe-text-schwach);
-}
-
-.testhinweis {
-  margin-top: 2rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--farbe-rand);
-  font-size: 0.8rem;
   color: var(--farbe-text-schwach);
 }
