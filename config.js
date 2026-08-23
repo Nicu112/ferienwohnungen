@@ -11,7 +11,9 @@ const CONFIG = {
       name: "Les Marmottes",
       standort: "Arolla",
       googleCalendarId: "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com",
-      appsScriptUrl: "", // TODO Phase 3: Web-App-URL des Apps Script
+      appsScriptUrl: "https://script.google.com/macros/s/AKfycbyWEDd57BOQ44hfJeDVKOeYo0-ukzfHPMxlSGLVZWpmoK3j97kG1frZh8whYrWLe28T_g/exec",
+
+Commit, dann nochmal eine frische Test-Reservation machen
       verwalterEmail: "lesmarmottesb@gmail.com",
       bilder: [], // TODO: echte Bild-URLs eintragen, z. B. ["img/haus1-1.jpg", ...] — leer lassen für Platzhalter
       preise: { erwachsene: 0, kind: 0, reinigung: 0 } // TODO: echte Preise in CHF eintragen (0 = "noch nicht festgelegt")
