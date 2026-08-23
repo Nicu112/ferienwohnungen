@@ -27,3 +27,24 @@ später in Claude Design leicht weiterentwickeln oder ersetzen lässt. */
 
 body {
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0 1.25rem 3rem;
+  max-width: 760px;
+  margin-inline: auto;
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text);
+  line-height: 1.5;
+}
+
+h1, h2 { line-height: 1.2; }
+
+.kopfzeile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0 1rem;
+}
+
+.marke {
+  font-weight: 700;
+  font-size: 1.3rem;
