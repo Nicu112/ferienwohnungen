@@ -5,14 +5,13 @@
 // umgestellt werden, sobald sein Kalender eingerichtet ist.
 const CONFIG = {
   googleCalendarApiKey: "AIzaSyAfDcKGwECtItLC5AlYFb3jnoJpmQM6_YY", // Lokal für Tests; auf GitHub leer
-
   haeuser: {
     haus1: {
       name: "Les Marmottes",
       standort: "Arolla, CH",
       ordner: "les-marmottes", // Unterordner in bilder/ und beschreibungen/
       googleCalendarId: "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com",
-      appsScriptUrl: "https://script.google.com/macros/s/AKfycbxD42xD-LKPbK8XFGmw3YlhC-B4wMuF2lxz20sUjyhP4m2-n7lpcEzac_drsMuPrSKOqQ/exec",
+      appsScriptUrl: "https://script.google.com/macros/s/AKfycbyWEDd57BOQ44hfJeDVKOeYo0-ukzfHPMxlSGLVZWpmoK3j97kG1frZh8whYrWLe28T_g/exec",
       verwalterEmail: "lesmarmottesb@gmail.com",
       bilder: ["bilder/les-marmottes/1.jpg", "bilder/les-marmottes/2.jpg", "bilder/les-marmottes/3.jpg", "bilder/les-marmottes/4.jpg", "bilder/les-marmottes/5.jpg"]
     },
