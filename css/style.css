@@ -309,6 +309,8 @@ h1, h2 { line-height: 1.2; }
   font-size: 0.85rem;
   color: var(--farbe-text);
   padding: 2px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .tag--frei:hover:not([disabled]) {
@@ -337,7 +339,13 @@ h1, h2 { line-height: 1.2; }
   cursor: default;
 }
 
-.tag-label { font-size: 0.62rem; }
+.tag-label {
+  font-size: 0.62rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: center;
+  max-width: 100%;
+}
 
 .tag--ausgewaehlt {
   outline: 2px solid var(--farbe-akzent);
@@ -489,79 +497,4 @@ nicht reinpasst. Kästchen zusätzlich etwas höher für zweizeiligen Platz. */
 
 .telefon-eingabe {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.telefon-plus {
-  font-size: 1rem;
-  color: var(--farbe-text-schwach);
-}
-
-.feld-input--vorwahl {
-  width: 3.4rem;
-  text-align: center;
-  flex: none;
-}
-
-.feld-input--nummer {
-  flex: 1;
-}
-
-.honeypot { display: none; }
-
-.anfrage-submit {
-  margin-top: 1.25rem;
-  padding: 0.75rem 1.4rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  min-height: 44px;
-  background: var(--farbe-akzent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-klein);
-}
-
-.anfrage-submit:hover:not([disabled]) {
-  background: var(--farbe-akzent-dunkel);
-}
-
-.anfrage-submit[disabled] {
-  background: var(--farbe-belegt);
-  color: var(--farbe-belegt-text);
-  cursor: not-allowed;
-}
-
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  opacity: 0.8;
-  border-radius: 50%;
-  vertical-align: middle;
-  animation: spinner-drehen 0.7s linear infinite;
-}
-
-.spinner[hidden] { display: none; }
-
-@keyframes spinner-drehen {
-  to { transform: rotate(360deg); }
-}
-
-.anfrage-erfolg {
-  margin-top: 1.25rem;
-  padding: 0.9rem 1rem;
-  background: var(--farbe-erfolg-bg);
-  color: var(--farbe-erfolg-text);
-  border-radius: var(--radius-klein);
-  font-size: 0.9rem;
-}
-
-.anfrage-erfolg pre {
-  white-space: pre-wrap;
-  font-size: 0.75rem;
-  color: var(--farbe-text-schwach);
-}
+  align-items:
