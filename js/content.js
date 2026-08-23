@@ -2,13 +2,31 @@
 // CONFIG.haeuser[haus].ordner) — direkt in diesen Dateien bearbeitbar, ohne
 // Code anzufassen. Bilder: URLs in CONFIG.haeuser[haus].bilder (siehe
 // config.js), ersetzt automatisch die Platzhalter-Kacheln unten.
-
 const KARUSSELL_ANZAHL_PLATZHALTER = 5;
-
 const BESCHREIBUNG_FALLBACK = {
   de: "Beschreibung folgt.",
   fr: "Description à venir."
 };
+
+// Wandelt reinen Text aus den .txt-Dateien in sicheres HTML um:
+// - Leerzeile = neuer Absatz
+// - einzelner Zeilenumbruch = <br>
+// - **Text** = fett
+// - http(s)://... = klickbarer Link
+// Der Text wird zuerst escaped, danach werden nur die erzeugten Tags
+// (<strong>, <a>, <br>, <p>) eingefügt — bleibt also weiterhin sicher.
+function formatiereBeschreibung(rohtext) {
+  let html = escapeHtml(rohtext);
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+  return html
+    .split(/\n\s*\n/)
+    .map(absatz => `<p>${absatz.trim().replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
 
 async function renderBeschreibung(hausKey, container) {
   const ordner = CONFIG.haeuser[hausKey].ordner;
@@ -21,11 +39,10 @@ async function renderBeschreibung(hausKey, container) {
   }
   container.innerHTML = `
     <h2 data-i18n="info.title"></h2>
-    <p>${escapeHtml(text)}</p>
+    ${formatiereBeschreibung(text)}
   `;
   wendeUebersetzungAn();
 }
-
 function renderStandort(hausKey, container) {
   const ort = CONFIG.haeuser[hausKey].standort;
   if (!ort) {
