@@ -32,7 +32,7 @@ async function renderBeschreibung(hausKey, container) {
   const ordner = CONFIG.haeuser[hausKey].ordner;
   let text = BESCHREIBUNG_FALLBACK[AKTUELLE_SPRACHE] || BESCHREIBUNG_FALLBACK.de;
   try {
-    const antwort = await fetch(`beschreibungen/${ordner}/${AKTUELLE_SPRACHE}.txt`);
+    const antwort = await fetch(`beschreibungen/${ordner}/${AKTUELLE_SPRACHE}.txt?t=${Date.now()}`);
     if (antwort.ok) text = (await antwort.text()).trim();
   } catch (err) {
     console.error("Beschreibung konnte nicht geladen werden:", err);
