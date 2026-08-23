@@ -12,19 +12,19 @@
 // gilt als offene Anfrage (gelb) — sieh calendar.js/parseEventTitel.
 //
 // Ablauf:
-//   doPost   <- Website sendet neue Anfrage (inkl. Sprache der Seite)
-//              -> "Name (ANGEFRAGT)"-Eintrag im Kalender
-//              -> Zeile im Sheet (inkl. Sprache)
-//              -> Mail an den Verwalter mit "Zusagen"/"Ablehnen"-Links
-//   doGet    <- Verwalter klickt einen der beiden Links in der Mail
-//     ablehnen  -> öffnet vorbereitete Antwort-Mail an den Gast, in der
-//                  Sprache, die der Gast beim Anfragen ausgewählt hatte
-//                  (Kalender-Eintrag bleibt vorerst bestehen)
-//     zusagen   -> benennt den bestehenden Eintrag auf reinen Namen um
-//                  (kein "(ANGEFRAGT)" mehr -> zählt automatisch als
-//                  "belegt"), schreibt Kontaktdaten in die Beschreibung
-//                  (die Website liest nur den Titel, nie die Beschreibung),
-//                  öffnet vorbereitete Bestätigungs-Mail (gleiche Sprachlogik)
+//   doPost <- Website sendet neue Anfrage (inkl. Sprache der Seite)
+//             -> "Name (ANGEFRAGT)"-Eintrag im Kalender
+//             -> Zeile im Sheet (inkl. Sprache)
+//             -> Mail an den Verwalter mit "Zusagen"/"Ablehnen"-Links
+//   doGet  <- Verwalter klickt einen der beiden Links in der Mail
+//             ablehnen -> öffnet vorbereitete Antwort-Mail an den Gast, in der
+//                         Sprache, die der Gast beim Anfragen ausgewählt hatte
+//                         (Kalender-Eintrag bleibt vorerst bestehen)
+//             zusagen  -> benennt den bestehenden Eintrag auf reinen Namen um
+//                         (kein "(ANGEFRAGT)" mehr -> zählt automatisch als
+//                         "belegt"), schreibt Kontaktdaten in die Beschreibung
+//                         (die Website liest nur den Titel, nie die Beschreibung),
+//                         öffnet vorbereitete Bestätigungs-Mail (gleiche Sprachlogik)
 
 const KALENDER_ID =
   "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com";
@@ -36,6 +36,13 @@ const SHEET_SPALTEN = [
   "id", "timestamp", "haus", "name", "email", "telefon", "von", "bis",
   "erwachsene", "kinder", "tiere", "tierart", "status", "eventId", "sprache"
 ];
+
+// Zwischenseite auf der eigenen Website: Zusagen-/Ablehnen-Links aus der Mail
+// zeigen zuerst hierhin (statt direkt auf script.google.com), damit Handys
+// mit installierter Google-Drive-App den Link nicht fälschlich als
+// Drive-Datei abfangen ("Impossible d'ouvrir le fichier..."). Die Seite
+// leitet per JavaScript sofort zum echten Apps-Script-Link weiter.
+const REDIRECT_SEITE = "https://nicu112.github.io/ferienwohnungen/bestaetigen.html";
 
 // Antwort-Texte als eigene Drive-Textdateien, damit sich der Wortlaut
 // ändern lässt, ohne den Code zu berühren. Werden beim ersten Aufruf mit
@@ -178,6 +185,7 @@ function doPost(e) {
   }
 
   const id = Utilities.getUuid();
+
   const angefragtEvent = kalender.createAllDayEvent(
     `${name} (ANGEFRAGT)`,
     new Date(von + "T00:00:00"),
@@ -192,8 +200,10 @@ function doPost(e) {
   ]);
 
   const webAppUrl = ScriptApp.getService().getUrl();
-  const zusagenLink = `${webAppUrl}?action=zusagen&id=${encodeURIComponent(id)}`;
-  const ablehnenLink = `${webAppUrl}?action=ablehnen&id=${encodeURIComponent(id)}`;
+  const zusagenZiel = `${webAppUrl}?action=zusagen&id=${encodeURIComponent(id)}`;
+  const ablehnenZiel = `${webAppUrl}?action=ablehnen&id=${encodeURIComponent(id)}`;
+  const zusagenLink = `${REDIRECT_SEITE}?ziel=${encodeURIComponent(zusagenZiel)}`;
+  const ablehnenLink = `${REDIRECT_SEITE}?ziel=${encodeURIComponent(ablehnenZiel)}`;
 
   const htmlBody = `
     <p>Neue Reservationsanfrage für ${HAUS_NAME}:</p>
@@ -224,23 +234,23 @@ function doPost(e) {
   const gastHtmlBody =
     spracheGast === "fr"
       ? `
-        <p>Votre demande de réservation pour ${HAUS_NAME} a bien été transmise :</p>
-        <ul>
-          <li><strong>Nom :</strong> ${name}</li>
-          <li><strong>Période :</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
-          <li><strong>Adultes :</strong> ${erwachsene}, <strong>Enfants :</strong> ${kinder}, <strong>Animaux :</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
-        </ul>
-        <p>Vous recevrez une réponse dès que votre demande aura été traitée.</p>
-      `
+    <p>Votre demande de réservation pour ${HAUS_NAME} a bien été transmise :</p>
+    <ul>
+      <li><strong>Nom :</strong> ${name}</li>
+      <li><strong>Période :</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
+      <li><strong>Adultes :</strong> ${erwachsene}, <strong>Enfants :</strong> ${kinder}, <strong>Animaux :</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
+    </ul>
+    <p>Vous recevrez une réponse dès que votre demande aura été traitée.</p>
+  `
       : `
-        <p>Deine Reservationsanfrage für ${HAUS_NAME} wurde übermittelt:</p>
-        <ul>
-          <li><strong>Name:</strong> ${name}</li>
-          <li><strong>Zeitspanne:</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
-          <li><strong>Erwachsene:</strong> ${erwachsene}, <strong>Kinder:</strong> ${kinder}, <strong>Tiere:</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
-        </ul>
-        <p>Du erhältst eine Rückmeldung, sobald deine Anfrage bearbeitet wurde.</p>
-      `;
+    <p>Deine Reservationsanfrage für ${HAUS_NAME} wurde übermittelt:</p>
+    <ul>
+      <li><strong>Name:</strong> ${name}</li>
+      <li><strong>Zeitspanne:</strong> ${formatiereDatum(von)} – ${formatiereDatum(bis)}</li>
+      <li><strong>Erwachsene:</strong> ${erwachsene}, <strong>Kinder:</strong> ${kinder}, <strong>Tiere:</strong> ${tiere}${tierart ? " (" + tierart + ")" : ""}</li>
+    </ul>
+    <p>Du erhältst eine Rückmeldung, sobald deine Anfrage bearbeitet wurde.</p>
+  `;
 
   MailApp.sendEmail({
     to: email,
@@ -303,11 +313,13 @@ function doGet(e) {
     if (event) event.deleteEvent();
 
     blatt.getRange(zeile, 13).setValue("abgelehnt"); // Spalte "status"
+
     const text = holeVorlage(`ablehnen-${spracheKlein}`, platzhalter);
     const mailtoLink =
       `mailto:${encodeURIComponent(email)}` +
       `?subject=${encodeURIComponent(betreffAblehnen(spracheKlein, name, von, bis))}` +
       `&body=${encodeURIComponent(text)}`;
+
     return mailSeite("Anfrage abgelehnt.", mailtoLink);
   }
 
@@ -331,6 +343,7 @@ function doGet(e) {
       `mailto:${encodeURIComponent(email)}` +
       `?subject=${encodeURIComponent(betreffZusagen(spracheKlein, name, von, bis))}` +
       `&body=${encodeURIComponent(text)}`;
+
     return mailSeite("Buchung bestätigt.", mailtoLink);
   }
 
