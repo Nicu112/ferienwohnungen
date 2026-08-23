@@ -10,8 +10,8 @@ später in Claude Design leicht weiterentwickeln oder ersetzen lässt. */
   --farbe-akzent-dunkel: #96513b;
   --farbe-angefragt: #fbead0;
   --farbe-angefragt-text: #8a5a1c;
-  --farbe-belegt: #ece7de;
-  --farbe-belegt-text: #948c7d;
+  --farbe-belegt: #d9ead3;
+  --farbe-belegt-text: #2e6b1f;
   --farbe-fehler-bg: #fbe6e2;
   --farbe-fehler-text: #a13f2c;
   --farbe-erfolg-bg: #eaf3e6;
@@ -497,4 +497,39 @@ nicht reinpasst. Kästchen zusätzlich etwas höher für zweizeiligen Platz. */
 
 .telefon-eingabe {
   display: flex;
-  align-items:
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.telefon-plus {
+  font-size: 1rem;
+  color: var(--farbe-text-schwach);
+}
+
+.feld-input--vorwahl {
+  width: 3.4rem;
+  text-align: center;
+  flex: none;
+}
+
+.feld-input--nummer {
+  flex: 1;
+}
+
+.honeypot { display: none; }
+
+.anfrage-submit {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  background: var(--farbe-akzent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-klein);
+}
+
+.anfrage-submit:hover:not([disabled]) {
+  background:
