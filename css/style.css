@@ -193,3 +193,379 @@ h1, h2 { line-height: 1.2; }
   background: rgba(255, 255, 255, 0.85);
   color: var(--farbe-text);
   font-size: 1.3rem;
+
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.karussell-nav--zurueck { left: 0.75rem; }
+.karussell-nav--vor { right: 0.75rem; }
+
+.karussell-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.karussell-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--farbe-rand);
+  padding: 0;
+  cursor: pointer;
+}
+
+.karussell-dot--aktiv { background: var(--farbe-akzent); }
+
+/* Beschreibung */
+.haus-info {
+  background: var(--farbe-flaeche);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 1.25rem 1.5rem;
+}
+
+.haus-info h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.haus-info p {
+  margin-bottom: 0;
+  color: var(--farbe-text-schwach);
+}
+
+/* Kalender */
+[data-kalender] {
+  background: var(--farbe-flaeche);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.kalender-kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.kalender-nav {
+  background: var(--farbe-hintergrund);
+  border: 1px solid var(--farbe-rand);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--farbe-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.kalender-monat { font-weight: 700; text-transform: capitalize; }
+
+.kalender-hinweis {
+  font-size: 0.9rem;
+  color: var(--farbe-text-schwach);
+  margin-bottom: 0.75rem;
+}
+
+.kalender-fehler {
+  font-size: 0.9rem;
+  color: var(--farbe-fehler-text);
+  background: var(--farbe-fehler-bg);
+  border-radius: var(--radius-klein);
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.kalender-raster {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.tag {
+  min-height: 58px;
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius-klein);
+  background: var(--farbe-flaeche);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--farbe-text);
+  padding: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tag--frei:hover:not([disabled]) {
+  border-color: var(--farbe-akzent);
+}
+
+.tag--leer { visibility: hidden; border: none; }
+
+.tag--angefragt {
+  background: var(--farbe-angefragt);
+  color: var(--farbe-angefragt-text);
+  cursor: not-allowed;
+}
+
+.tag--belegt {
+  background: var(--farbe-kalender-belegt);
+  color: var(--farbe-kalender-belegt-text);
+  cursor: not-allowed;
+}
+
+.tag--frei[disabled] { cursor: not-allowed; }
+
+.tag--vergangen {
+  color: var(--farbe-text-schwach);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tag-label {
+  font-size: 0.62rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: center;
+  max-width: 100%;
+}
+
+.tag--ausgewaehlt {
+  outline: 2px solid var(--farbe-akzent);
+  outline-offset: -1px;
+}
+
+.tag--im-bereich {
+  background: #f6ece7;
+}
+
+.kalender-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.1rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--farbe-rand);
+  font-size: 0.8rem;
+  color: var(--farbe-text-schwach);
+}
+
+.legende-eintrag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legende-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--farbe-rand);
+  flex-shrink: 0;
+}
+
+.legende-swatch--frei { background: var(--farbe-flaeche); }
+
+.legende-swatch--angefragt {
+  background: var(--farbe-angefragt);
+  border-color: var(--farbe-angefragt-text);
+}
+
+.legende-swatch--belegt {
+  background: var(--farbe-kalender-belegt);
+  border-color: var(--farbe-kalender-belegt-text);
+}
+
+@media (max-width: 640px) {
+  .tag {
+    min-height: 64px;
+  }
+  .tag-label {
+    font-size: 0.52rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+
+.anfrage-box {
+  background: var(--farbe-flaeche);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.anfrage-box h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.anfrage-zeitspanne {
+  font-weight: 600;
+  color: var(--farbe-text-schwach);
+}
+
+.zaehler {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.6rem 0;
+}
+
+.zaehler-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.zaehler-controls button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  border: 1px solid var(--farbe-rand);
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text);
+  cursor: pointer;
+}
+
+.zaehler-wert {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.feld-label {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--farbe-text-schwach);
+}
+
+.feld-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius-klein);
+  min-height: 44px;
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+}
+
+.feld-input:focus {
+  outline: none;
+  border-color: var(--farbe-akzent);
+  box-shadow: 0 0 0 3px rgba(181, 101, 74, 0.15);
+}
+
+.feld-input--ungueltig {
+  background: #fdf3d9;
+  border-color: #e0b400;
+}
+
+.tierart-wrapper { margin-top: 0.25rem; }
+
+.telefon-eingabe {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.telefon-plus {
+  font-size: 1rem;
+  color: var(--farbe-text-schwach);
+}
+
+.feld-input--vorwahl {
+  width: 3.4rem;
+  text-align: center;
+  flex: none;
+}
+
+.feld-input--nummer {
+  flex: 1;
+}
+
+.honeypot { display: none; }
+
+.anfrage-submit {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  background: var(--farbe-akzent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-klein);
+}
+
+.anfrage-submit:hover:not([disabled]) {
+  background: var(--farbe-akzent-dunkel);
+}
+
+.anfrage-submit[disabled] {
+  background: var(--farbe-belegt);
+  color: var(--farbe-belegt-text);
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.8;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: spinner-drehen 0.7s linear infinite;
+}
+
+.spinner[hidden] { display: none; }
+
+@keyframes spinner-drehen {
+  to { transform: rotate(360deg); }
+}
+
+.anfrage-erfolg {
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  background: var(--farbe-erfolg-bg);
+  color: var(--farbe-erfolg-text);
+  border-radius: var(--radius-klein);
+  font-size: 0.9rem;
+}
+
+.anfrage-erfolg pre {
+  white-space: pre-wrap;
+  font-size: 0.75rem;
+  color: var(--farbe-text-schwach);
+}
