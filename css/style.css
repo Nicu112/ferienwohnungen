@@ -1,6 +1,5 @@
 /* Modernes, helles Basis-Design. Bewusst schlicht gehalten, damit es sich
-   später in Claude Design leicht weiterentwickeln oder ersetzen lässt. */
-
+später in Claude Design leicht weiterentwickeln oder ersetzen lässt. */
 :root {
   --farbe-hintergrund: #faf7f2;
   --farbe-flaeche: #ffffff;
@@ -133,7 +132,6 @@ h1, h2 { line-height: 1.2; }
 }
 
 /* Karussell */
-
 .karussell-viewport {
   position: relative;
   overflow: hidden;
@@ -223,7 +221,6 @@ h1, h2 { line-height: 1.2; }
 .karussell-dot--aktiv { background: var(--farbe-akzent); }
 
 /* Beschreibung */
-
 .haus-info {
   background: var(--farbe-flaeche);
   border: 1px solid var(--farbe-rand);
@@ -243,7 +240,6 @@ h1, h2 { line-height: 1.2; }
 }
 
 /* Kalender */
-
 [data-kalender] {
   background: var(--farbe-flaeche);
   border: 1px solid var(--farbe-rand);
@@ -353,8 +349,8 @@ h1, h2 { line-height: 1.2; }
 }
 
 /* Legende jetzt auf allen Bildschirmgrössen sichtbar: die Kästchen zeigen
-   den Namen aus dem Kalender-Event statt "belegt"/"angefragt", daher braucht
-   auch Desktop die Erklärung, was Grau/Gelb bedeutet. */
+den Namen aus dem Kalender-Event statt "belegt"/"angefragt", daher braucht
+auch Desktop die Erklärung, was Grau/Gelb bedeutet. */
 .kalender-legende {
   display: flex;
   flex-wrap: wrap;
@@ -392,12 +388,24 @@ h1, h2 { line-height: 1.2; }
   border-color: var(--farbe-belegt-text);
 }
 
+/* Auf schmalen Bildschirmen bleibt der Name sichtbar (statt komplett
+ausgeblendet), dafür kleiner geschrieben und mit "…" abgeschnitten, falls er
+nicht reinpasst. Kästchen zusätzlich etwas höher für zweizeiligen Platz. */
 @media (max-width: 640px) {
-  .tag-label { display: none; }
+  .tag {
+    min-height: 64px;
+  }
+  .tag-label {
+    font-size: 0.52rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
 }
 
 /* Anfrageformular */
-
 .anfrage-box {
   background: var(--farbe-flaeche);
   border: 1px solid var(--farbe-rand);
