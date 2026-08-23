@@ -301,7 +301,7 @@ h1, h2 { line-height: 1.2; }
 }
 
 .tag {
-  min-height: 52px;
+  min-height: 58px;
   border: 1px solid var(--farbe-rand);
   border-radius: var(--radius-klein);
   background: var(--farbe-flaeche);
