@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weiterleitung…</title>
+</head>
+<body style="font-family:sans-serif;text-align:center;margin-top:3rem;color:#555;">
+<p>Einen Moment, du wirst weitergeleitet…</p>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const ziel = params.get("ziel");
+  if (ziel) {
+    window.location.href = ziel;
+  } else {
+    document.body.innerHTML = "<p>Kein Ziel angegeben.</p>";
+  }
+</script>
+</body>
+</html>
