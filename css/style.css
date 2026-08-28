@@ -240,6 +240,8 @@ h1, h2 { line-height: 1.2; }
 .haus-info p {
   margin-bottom: 0;
   color: var(--farbe-text-schwach);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Kalender */
