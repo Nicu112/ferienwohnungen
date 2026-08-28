@@ -28,11 +28,11 @@ const CONFIG = {
     haus3: {
       name: "Orion",
       standort: "Leytron, CH",
-      ordner: "orion",
+      ordner: "Ovronnaz",
       googleCalendarId: "11d1b8e4cccbbed74089b37945fba45f7d5afec1c700ad80fa575bfd86b0d051@group.calendar.google.com",
       appsScriptUrl: "https://script.google.com/macros/s/AKfycby3C8YIJY1hhqLV8bHBUWaaGt3QNKFi1zB2CQdOBktflTy0YHQIi0dMWZBsmuSi2Usgtw/exec",
       verwalterEmail: "ovz.orion@gmail.com",
-      bilder: ["bilder/orion/1.jpg", "bilder/orion/2.jpg", "bilder/orion/3.jpg", "bilder/orion/4.jpg", "bilder/orion/5.jpg"]
+      bilder: ["bilder/Ovronnaz/1.jpg", "bilder/Ovronnaz/2.jpg", "bilder/Ovronnaz/3.jpg", "bilder/Ovronnaz/4.jpg", "bilder/Ovronnaz/5.jpg"]
     }
   }
 };
