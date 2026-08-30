@@ -6,14 +6,30 @@
 <title>Weiterleitung…</title>
 </head>
 <body style="font-family:sans-serif;text-align:center;margin-top:3rem;color:#555;">
-<p>Einen Moment, du wirst weitergeleitet…</p>
+<div id="inhalt"><p>Einen Moment…</p></div>
 <script>
+  // Bewusst KEIN automatischer window.location-Redirect: auf manchen Handys
+  // (v. a. mit installierter Google-Drive-App) fängt das Betriebssystem eine
+  // automatische Weiterleitung zu script.google.com ab und versucht, sie als
+  // Drive-Datei zu öffnen ("Impossible d'ouvrir le fichier..."), statt sie im
+  // Browser zu lassen. Ein echter Tap auf einen normalen Link funktioniert
+  // dagegen zuverlässig, weil dann der Browser selbst am Zug ist.
   const params = new URLSearchParams(window.location.search);
   const ziel = params.get("ziel");
+  const inhalt = document.getElementById("inhalt");
   if (ziel) {
-    window.location.href = ziel;
+    inhalt.innerHTML = "<p>Bitte antippen, um fortzufahren:</p>";
+    const absatz = document.createElement("p");
+    const link = document.createElement("a");
+    link.href = ziel;
+    link.textContent = "Weiter";
+    link.style.cssText =
+      "display:inline-block;padding:12px 24px;background:#b5654a;color:#fff;" +
+      "text-decoration:none;border-radius:6px;font-size:16px;";
+    absatz.appendChild(link);
+    inhalt.appendChild(absatz);
   } else {
-    document.body.innerHTML = "<p>Kein Ziel angegeben.</p>";
+    inhalt.innerHTML = "<p>Kein Ziel angegeben.</p>";
   }
 </script>
 </body>
