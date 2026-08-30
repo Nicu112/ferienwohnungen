@@ -8,28 +8,38 @@
 <body style="font-family:sans-serif;text-align:center;margin-top:3rem;color:#555;">
 <div id="inhalt"><p>Einen Moment…</p></div>
 <script>
-  // Bewusst KEIN automatischer window.location-Redirect: auf manchen Handys
-  // (v. a. mit installierter Google-Drive-App) fängt das Betriebssystem eine
-  // automatische Weiterleitung zu script.google.com ab und versucht, sie als
-  // Drive-Datei zu öffnen ("Impossible d'ouvrir le fichier..."), statt sie im
-  // Browser zu lassen. Ein echter Tap auf einen normalen Link funktioniert
-  // dagegen zuverlässig, weil dann der Browser selbst am Zug ist.
+  // Bewusst KEINE Navigation (weder automatischer window.location-Redirect
+  // noch ein anklickbarer <a href> zu script.google.com): auf manchen Handys
+  // (v. a. mit installierter Google-Drive-App) fängt das Betriebssystem JEDE
+  // echte Navigation zu einer script.google.com-Adresse ab und versucht, sie
+  // als Drive-Datei zu öffnen ("Impossible d'ouvrir le fichier..."), egal ob
+  // per Skript oder per echtem Tap auf einen Link.
+  //
+  // Stattdessen wird die Zusagen-/Ablehnen-Aktion per fetch() im Hintergrund
+  // aufgerufen (genau wie js/form.js das für die Anfrage selbst schon tut) —
+  // das ist keine Seiten-Navigation, sondern nur ein HTTP-Request aus dem
+  // JavaScript heraus, den das Betriebssystem nicht abfangen kann. Die
+  // zurückgegebene Antwort-Seite von Apps Script wird direkt hier eingebettet
+  // angezeigt.
   const params = new URLSearchParams(window.location.search);
   const ziel = params.get("ziel");
   const inhalt = document.getElementById("inhalt");
+
+  async function verarbeiten(url) {
+    try {
+      const antwort = await fetch(url);
+      const html = await antwort.text();
+      const dokument = new DOMParser().parseFromString(html, "text/html");
+      inhalt.innerHTML = dokument.body ? dokument.body.innerHTML : html;
+    } catch (err) {
+      inhalt.innerHTML =
+        "<p>Die Anfrage konnte nicht verarbeitet werden (Verbindungsfehler). " +
+        "Bitte die Seite nochmal laden oder Nicu Bescheid geben.</p>";
+    }
+  }
+
   if (ziel) {
-    inhalt.innerHTML = "<p>Bitte antippen, um fortzufahren:</p>";
-    const absatz = document.createElement("p");
-    const link = document.createElement("a");
-    link.href = ziel;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = "Weiter";
-    link.style.cssText =
-      "display:inline-block;padding:12px 24px;background:#b5654a;color:#fff;" +
-      "text-decoration:none;border-radius:6px;font-size:16px;";
-    absatz.appendChild(link);
-    inhalt.appendChild(absatz);
+    verarbeiten(ziel);
   } else {
     inhalt.innerHTML = "<p>Kein Ziel angegeben.</p>";
   }
