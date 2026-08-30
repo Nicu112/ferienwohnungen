@@ -76,7 +76,12 @@ async function ladeMonatsEvents(hausKey, jahr, monat) {
     `&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}` +
     `&singleEvents=true&orderBy=startTime`;
 
-  const antwort = await fetch(url);
+  // cache: "no-store" erzwingen — ohne das kann der Browser eine identische
+  // Anfrage-URL (gleicher Monat) aus seinem HTTP-Cache beantworten, statt
+  // wirklich neu bei Google nachzufragen. Genau das könnte erklären, warum
+  // eine frisch angelegte ANGEFRAGT-Buchung auf der Seite nicht auftaucht:
+  // der Browser zeigt einfach eine ältere, zwischengespeicherte Antwort.
+  const antwort = await fetch(url, { cache: "no-store" });
   if (!antwort.ok) throw new Error(`Google Calendar API: ${antwort.status}`);
   const daten = await antwort.json();
 
