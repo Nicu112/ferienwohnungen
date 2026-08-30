@@ -139,6 +139,7 @@ function hatBlockiertenTagDazwischen(hausKey, startISO, endeISO, echteEvents) {
 async function renderKalender(hausKey, container) {
   const state = HAUS_STATE[hausKey];
   const { jahr, monat } = state;
+  const haus = CONFIG.haeuser[hausKey];
 
   let echteEvents;
   let ladeFehler = false;
@@ -163,6 +164,7 @@ async function renderKalender(hausKey, container) {
   const monatsName = ersterTag.toLocaleDateString(AKTUELLE_SPRACHE, { month: "long", year: "numeric" });
 
   let html = `
+    <div class="kalender-haus-titel">${escapeHtml(haus.name)}</div>
     <div class="kalender-kopf">
       <button type="button" class="kalender-nav" data-nav="prev" aria-label="${t("calendar.prev")}">‹</button>
       <span class="kalender-monat">${monatsName}</span>
