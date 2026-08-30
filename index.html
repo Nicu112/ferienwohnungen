@@ -4,9 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ferienwohnungen — Testversion</title>
+<!-- Zugangscode-Sperre: läuft synchron vor dem ersten Rendern, damit der
+     Seiteninhalt nicht kurz aufblitzt, bevor er ausgeblendet wird. Der
+     eigentliche Eingabe-Dialog kommt aus js/zugangscode.js. -->
+<script>
+(function () {
+  try {
+    if (localStorage.getItem("ferienwohnungen-zugang") === "ok") return;
+  } catch (err) {}
+  document.documentElement.classList.add("zugang-gesperrt");
+})();
+</script>
+<style>
+html.zugang-gesperrt body > *:not(.zugang-overlay) { display: none !important; }
+</style>
 <link rel="stylesheet" href="css/style.css?t=20260823">
 </head>
 <body>
+<script src="js/zugangscode.js?t=20260823"></script>
 <header class="kopfzeile">
 <span class="marke">Ferienwohnungen</span>
 <nav class="sprachumschalter" aria-label="Sprache">
