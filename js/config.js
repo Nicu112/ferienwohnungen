@@ -11,7 +11,7 @@ const CONFIG = {
       standort: "Arolla, CH",
       ordner: "les-marmottes", // Unterordner in bilder/ und beschreibungen/
       googleCalendarId: "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com",
-      appsScriptUrl: "https://script.google.com/macros/s/AKfycbygsSLB2DaShd6qZiWG_LrIeXnj3AossHAoof8tafz-LB5kdzXUkZGxZPNrz0lCbpSBsA/exec",
+      appsScriptUrl: "https://script.google.com/macros/s/AKfycbyjRLyOfCYlzeJA_B2NtbUkoCY_M6djI46ul83Jb8NFPxfG5B8y8oEV_i2W6RyINGnFnQ/exec",
       verwalterEmail: "lesmarmottesb@gmail.com",
       bilder: ["bilder/les-marmottes/1.jpg", "bilder/les-marmottes/2.jpg", "bilder/les-marmottes/3.jpg", "bilder/les-marmottes/4.jpg", "bilder/les-marmottes/5.jpg"]
     },
@@ -30,7 +30,7 @@ const CONFIG = {
       standort: "Ovronnaz, CH",
       ordner: "Ovronnaz",
       googleCalendarId: "11d1b8e4cccbbed74089b37945fba45f7d5afec1c700ad80fa575bfd86b0d051@group.calendar.google.com",
-      appsScriptUrl: "https://script.google.com/macros/s/AKfycbxAq2-q1DxeUcsEofS6oyWdcxmfI3ggbr5FvlTcJMm9_93UHnwGUFT0lEtiszE_pYuysA/exec",
+      appsScriptUrl: "https://script.google.com/macros/s/AKfycbxU2GLreyf0wp6lbq07xwy3aCLb6wEq8As3_X61SLOz8OJ_80lTsxUQzod62BOmc-gIdA/exec",
       verwalterEmail: "ovz.orion@gmail.com",
       bilder: ["bilder/Ovronnaz/1.jpg", "bilder/Ovronnaz/2.jpg", "bilder/Ovronnaz/3.jpg", "bilder/Ovronnaz/4.jpg", "bilder/Ovronnaz/5.jpg"]
     }
