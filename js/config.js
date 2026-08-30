@@ -11,7 +11,7 @@ const CONFIG = {
       standort: "Arolla, CH",
       ordner: "les-marmottes", // Unterordner in bilder/ und beschreibungen/
       googleCalendarId: "4272fb587c47328f819830065cf06566108ca68f64dcf0a6a89f6fd6f399b933@group.calendar.google.com",
-      appsScriptUrl: "https://script.google.com/macros/s/AKfycbyT5WaZH2aNdd5BrzImm1iq_FbX7HXxJ26JDIc6eplPeSzN2OALO3_cX4iUM3ct39JsfQ/exec",
+      appsScriptUrl: "https://script.google.com/macros/s/AKfycbzQFxO_xkPh4R6LipE7YMRaUuLPGVY2NXc2TC-qJZNwHYiD2LwmVxFPTXpBRPi-6TJgFA/exec",
       verwalterEmail: "lesmarmottesb@gmail.com",
       bilder: ["bilder/les-marmottes/1.jpg", "bilder/les-marmottes/2.jpg", "bilder/les-marmottes/3.jpg", "bilder/les-marmottes/4.jpg", "bilder/les-marmottes/5.jpg"]
     },
