@@ -571,3 +571,48 @@ h1, h2 { line-height: 1.2; }
   font-size: 0.75rem;
   color: var(--farbe-text-schwach);
 }
+
+/* Zugangscode-Sperre */
+.zugang-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--farbe-hintergrund);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+}
+
+.zugang-box {
+  background: var(--farbe-flaeche);
+  border: 1px solid var(--farbe-rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 2rem 1.75rem;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+
+.zugang-titel {
+  margin: 0 0 1rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.zugang-box .feld-input {
+  text-align: center;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.zugang-box .anfrage-submit {
+  width: 100%;
+}
+
+.zugang-fehler {
+  margin: 0.9rem 0 0;
+  color: var(--farbe-fehler-text);
+  font-size: 0.85rem;
+}
