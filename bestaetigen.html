@@ -22,6 +22,8 @@
     const absatz = document.createElement("p");
     const link = document.createElement("a");
     link.href = ziel;
+    link.target = "_blank";
+    link.rel = "noopener";
     link.textContent = "Weiter";
     link.style.cssText =
       "display:inline-block;padding:12px 24px;background:#b5654a;color:#fff;" +
