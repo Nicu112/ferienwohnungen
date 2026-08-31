@@ -144,6 +144,27 @@ function baueFarbZuordnung(alleEvents) {
   return zuordnung;
 }
 
+// Besetzt eine BESTÄTIGTE Buchung den NACHMITTAG dieses Tages? (Tag liegt in
+// [von, bis) einer BELEGT-Buchung -- der Grenztag "bis" selbst zählt NICHT:
+// dort ist der Gast ja schon abgereist, der Nachmittag ist frei für eine
+// neue Anreise. Offene Anfragen fliessen hier bewusst NICHT ein -- die
+// blockieren weiterhin den ganzen Tag, siehe klickbar-Berechnung unten.)
+function nachmittagBelegt(alleEvents, isoDatum) {
+  return alleEvents.some(
+    (ev) => ev.status === "BELEGT" && ev.von <= isoDatum && isoDatum < ev.bis
+  );
+}
+
+// Besetzt eine BESTÄTIGTE Buchung den VORMITTAG dieses Tages? (Tag liegt in
+// (von, bis] einer BELEGT-Buchung -- der Grenztag "von" selbst zählt NICHT:
+// dort reist der Gast ja erst nachmittags an, der Vormittag ist frei für
+// eine neue Abreise.)
+function vormittagBelegt(alleEvents, isoDatum) {
+  return alleEvents.some(
+    (ev) => ev.status === "BELEGT" && ev.von < isoDatum && isoDatum <= ev.bis
+  );
+}
+
 const FARBE_VARIANTEN = {
   BELEGT: ["var(--farbe-kalender-belegt-a)", "var(--farbe-kalender-belegt-b)"],
   ANGEFRAGT: ["var(--farbe-angefragt-a)", "var(--farbe-angefragt-b)"]
@@ -272,7 +293,25 @@ async function renderKalender(hausKey, container) {
     if (istAusgewaehlt) klassen.push("tag--ausgewaehlt");
     if (imBereich) klassen.push("tag--im-bereich");
 
-    const klickbar = status === "FREI" && !istVergangen;
+    // Wechseltag-Regel: nur bei BESTÄTIGTEN Buchungen (status "BELEGT") ist
+    // ein Tag, an dem nur eine Hälfte belegt ist, für die jeweils freie
+    // Hälfte trotzdem wählbar -- Auschecken ist morgens, Einchecken
+    // nachmittags. Beim 1. Klick (Anreise) zählt der Nachmittag, beim 2.
+    // Klick (Abreise) der Vormittag; ist bereits eine ganze Zeitspanne
+    // gewählt, gilt ein weiterer Klick wieder als neue Anreise. Offene
+    // Anfragen (status "ANGEFRAGT") blockieren weiterhin den ganzen Tag --
+    // da noch nicht sicher ist, ob die Anfrage überhaupt bestätigt wird.
+    const zweiterKlickAusstehend = Boolean(state.start) && !state.ende;
+    let klickbar = !istVergangen;
+    if (status === "FREI") {
+      // bleibt wie gesetzt
+    } else if (status === "BELEGT") {
+      klickbar =
+        klickbar &&
+        (zweiterKlickAusstehend ? !vormittagBelegt(alleEvents, iso) : !nachmittagBelegt(alleEvents, iso));
+    } else {
+      klickbar = false;
+    }
     // Am Wechseltag (geteilt) bewusst kein Name -- welcher der beiden wäre
     // irreführend, die Farbteilung sagt schon "hier wechselt die Buchung".
     // Sonst bevorzugt der Name aus dem Event-Titel; nur wenn keiner
