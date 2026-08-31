@@ -451,7 +451,7 @@ h1, h2 { line-height: 1.2; }
 }
 
 .legende-swatch--wechsel {
-  background: linear-gradient(135deg, var(--farbe-kalender-belegt-a) 0 50%, var(--farbe-kalender-belegt-b) 50% 100%);
+  background: linear-gradient(90deg, var(--farbe-kalender-belegt-a) 0 50%, var(--farbe-kalender-belegt-b) 50% 100%);
   border-color: var(--farbe-kalender-belegt-text-b);
 }
 
