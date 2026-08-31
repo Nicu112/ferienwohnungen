@@ -14,6 +14,18 @@ später in Claude Design leicht weiterentwickeln oder ersetzen lässt. */
   --farbe-belegt-text: #948c7d;
   --farbe-kalender-belegt: #d9ead3;
   --farbe-kalender-belegt-text: #2e6b1f;
+  /* Zwei Grün-/Gelbtöne, damit im Kalender aufeinanderfolgende Buchungen
+     (bzw. Anfragen) sich abwechselnd unterscheiden lassen -- vor allem bei
+     dichter Belegung, wenn am selben Tag eine Buchung endet und die nächste
+     beginnt (siehe .tag--geteilt). "-a" ist jeweils die bisherige Farbe. */
+  --farbe-kalender-belegt-a: #d9ead3;
+  --farbe-kalender-belegt-text-a: #2e6b1f;
+  --farbe-kalender-belegt-b: #a3cf95;
+  --farbe-kalender-belegt-text-b: #1f4a14;
+  --farbe-angefragt-a: #fbead0;
+  --farbe-angefragt-text-a: #8a5a1c;
+  --farbe-angefragt-b: #f3cf78;
+  --farbe-angefragt-text-b: #6b4512;
   --farbe-fehler-bg: #fbe6e2;
   --farbe-fehler-text: #a13f2c;
   --farbe-erfolg-bg: #eaf3e6;
@@ -344,6 +356,38 @@ h1, h2 { line-height: 1.2; }
   cursor: not-allowed;
 }
 
+.tag--angefragt-a {
+  background: var(--farbe-angefragt-a);
+  color: var(--farbe-angefragt-text-a);
+  cursor: not-allowed;
+}
+
+.tag--angefragt-b {
+  background: var(--farbe-angefragt-b);
+  color: var(--farbe-angefragt-text-b);
+  cursor: not-allowed;
+}
+
+.tag--belegt-a {
+  background: var(--farbe-kalender-belegt-a);
+  color: var(--farbe-kalender-belegt-text-a);
+  cursor: not-allowed;
+}
+
+.tag--belegt-b {
+  background: var(--farbe-kalender-belegt-b);
+  color: var(--farbe-kalender-belegt-text-b);
+  cursor: not-allowed;
+}
+
+/* Wechseltag: eine Buchung endet, eine neue beginnt am selben Tag. Die
+   diagonale Farbteilung kommt als Inline-Style von calendar.js (die zwei
+   Farben sind dynamisch); hier nur Cursor/Text-Feinschliff. */
+.tag--geteilt {
+  cursor: not-allowed;
+  color: var(--farbe-text);
+}
+
 .tag--frei[disabled] { cursor: not-allowed; }
 
 .tag--vergangen {
@@ -404,6 +448,11 @@ h1, h2 { line-height: 1.2; }
 .legende-swatch--belegt {
   background: var(--farbe-kalender-belegt);
   border-color: var(--farbe-kalender-belegt-text);
+}
+
+.legende-swatch--wechsel {
+  background: linear-gradient(135deg, var(--farbe-kalender-belegt-a) 0 50%, var(--farbe-kalender-belegt-b) 50% 100%);
+  border-color: var(--farbe-kalender-belegt-text-b);
 }
 
 @media (max-width: 640px) {
