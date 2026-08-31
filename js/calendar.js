@@ -346,7 +346,7 @@ async function renderKalender(hausKey, container) {
       : status === "BELEGT" ? t("calendar.booked") : status === "ANGEFRAGT" ? t("calendar.requested") : "";
 
     const stil = geteilt
-      ? ` style="background: linear-gradient(90deg, ${linksFarbe} 0 50%, ${rechtsFarbe} 50% 100%);"`
+      ? ` style="background: linear-gradient(90deg, ${linksFarbe} 50%, ${rechtsFarbe} 50%);"`
       : "";
 
     html += `
