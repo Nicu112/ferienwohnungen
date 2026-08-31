@@ -380,12 +380,17 @@ h1, h2 { line-height: 1.2; }
   cursor: not-allowed;
 }
 
-/* Wechseltag: eine Buchung endet, eine neue beginnt am selben Tag. Die
-   diagonale Farbteilung kommt als Inline-Style von calendar.js (die zwei
-   Farben sind dynamisch); hier nur Cursor/Text-Feinschliff. */
+/* Wechseltag bzw. halb freier Kantentag: die Farbteilung kommt als
+   Inline-Style von calendar.js (die zwei Farben sind dynamisch). Anders als
+   bei den reinen Belegt-Feldern OBEN bewusst kein pauschales
+   cursor:not-allowed -- die freie Hälfte kann ja anklickbar sein, das
+   [disabled]-Attribut (siehe unten) entscheidet das pro Tag korrekt. */
 .tag--geteilt {
-  cursor: not-allowed;
   color: var(--farbe-text);
+}
+
+.tag--geteilt[disabled] {
+  cursor: not-allowed;
 }
 
 .tag--frei[disabled] { cursor: not-allowed; }
