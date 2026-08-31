@@ -171,8 +171,8 @@ function ermittleTagesDarstellung(isoDatum, alleEvents, farbZuordnung) {
       status,
       geteilt: true,
       name: "",
-      obenFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(endend) ?? 0],
-      untenFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(beginnend) ?? 0]
+      linksFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(endend) ?? 0],
+      rechtsFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(beginnend) ?? 0]
     };
   }
 
@@ -252,7 +252,7 @@ async function renderKalender(hausKey, container) {
   for (let tag = 1; tag <= anzahlTage; tag++) {
     const datum = new Date(jahr, monat, tag);
     const iso = zuISO(datum);
-    const { status, name, geteilt, variante, obenFarbe, untenFarbe } =
+    const { status, name, geteilt, variante, linksFarbe, rechtsFarbe } =
       ermittleTagesDarstellung(iso, alleEvents, farbZuordnung);
     const istVergangen = datum < heute;
     const istAusgewaehlt =
@@ -284,7 +284,7 @@ async function renderKalender(hausKey, container) {
       : status === "BELEGT" ? t("calendar.booked") : status === "ANGEFRAGT" ? t("calendar.requested") : "";
 
     const stil = geteilt
-      ? ` style="background: linear-gradient(135deg, ${obenFarbe} 0 50%, ${untenFarbe} 50% 100%);"`
+      ? ` style="background: linear-gradient(90deg, ${linksFarbe} 0 50%, ${rechtsFarbe} 50% 100%);"`
       : "";
 
     html += `
