@@ -124,6 +124,67 @@ function ermittleTagesStatus(hausKey, isoDatum, echteEvents) {
   return ermittleTagesInfo(hausKey, isoDatum, echteEvents).status;
 }
 
+// Weist jeder Buchung (getrennt für BELEGT und ANGEFRAGT) abwechselnd Farb-
+// variante 0/1 zu, chronologisch nach Anreisedatum sortiert -- so bekommen
+// aufeinanderfolgende Aufenthalte unterscheidbare Farben (z. B. an dicht
+// belegten Wochen erkennt man auf einen Blick, wo eine Buchung endet und die
+// nächste beginnt). Map-Key ist das Event-Objekt selbst (bleibt innerhalb
+// eines renderKalender()-Aufrufs stabil).
+function baueFarbZuordnung(alleEvents) {
+  const gruppen = { BELEGT: [], ANGEFRAGT: [] };
+  alleEvents.forEach((ev) => {
+    (ev.status === "BELEGT" ? gruppen.BELEGT : gruppen.ANGEFRAGT).push(ev);
+  });
+  const zuordnung = new Map();
+  Object.values(gruppen).forEach((liste) => {
+    [...liste]
+      .sort((a, b) => (a.von < b.von ? -1 : a.von > b.von ? 1 : 0))
+      .forEach((ev, i) => zuordnung.set(ev, i % 2));
+  });
+  return zuordnung;
+}
+
+const FARBE_VARIANTEN = {
+  BELEGT: ["var(--farbe-kalender-belegt-a)", "var(--farbe-kalender-belegt-b)"],
+  ANGEFRAGT: ["var(--farbe-angefragt-a)", "var(--farbe-angefragt-b)"]
+};
+
+// Wie ermittleTagesInfo(), liefert aber zusätzlich die Farbvariante (a/b) und
+// erkennt einen Wechseltag: eine Buchung endet genau an diesem Tag, eine
+// andere (mit demselben Status) beginnt am selben Tag -- typisch bei dichter
+// Belegung (Abreise + Anreise am selben Datum). An so einem Tag wird kein
+// Name gezeigt (welcher der beiden wäre schon irreführend), stattdessen wird
+// das Feld beim Rendern diagonal zwischen den beiden Buchungsfarben geteilt.
+function ermittleTagesDarstellung(isoDatum, alleEvents, farbZuordnung) {
+  const amTag = alleEvents.filter((ev) => isoDatum >= ev.von && isoDatum <= ev.bis);
+  const belegt = amTag.filter((ev) => ev.status === "BELEGT");
+  const relevant = belegt.length ? belegt : amTag;
+  const status = belegt.length ? "BELEGT" : relevant.length ? "ANGEFRAGT" : "FREI";
+
+  if (status === "FREI") return { status, name: "", geteilt: false };
+
+  const endend = relevant.find((ev) => ev.bis === isoDatum);
+  const beginnend = relevant.find((ev) => ev.von === isoDatum && ev !== endend);
+
+  if (relevant.length === 2 && endend && beginnend && endend !== beginnend) {
+    return {
+      status,
+      geteilt: true,
+      name: "",
+      obenFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(endend) ?? 0],
+      untenFarbe: FARBE_VARIANTEN[status][farbZuordnung.get(beginnend) ?? 0]
+    };
+  }
+
+  const ev = relevant[0];
+  return {
+    status,
+    geteilt: false,
+    name: ev.name || "",
+    variante: farbZuordnung.get(ev) ?? 0
+  };
+}
+
 // Prüft, ob zwischen zwei Tagen (exklusive der Ränder) ein blockierter Tag liegt.
 function hatBlockiertenTagDazwischen(hausKey, startISO, endeISO, echteEvents) {
   const start = new Date(startISO);
@@ -183,30 +244,51 @@ async function renderKalender(hausKey, container) {
   const heute = new Date();
   heute.setHours(0, 0, 0, 0);
 
+  // Einmal pro Render berechnet (nicht pro Tag), damit die Abwechslungs-
+  // Reihenfolge über den ganzen Monat konsistent bleibt.
+  const alleEvents = [...(echteEvents || MOCK_EVENTS[hausKey] || []), ...(TEST_REQUESTS[hausKey] || [])];
+  const farbZuordnung = baueFarbZuordnung(alleEvents);
+
   for (let tag = 1; tag <= anzahlTage; tag++) {
     const datum = new Date(jahr, monat, tag);
     const iso = zuISO(datum);
-    const { status, name } = ermittleTagesInfo(hausKey, iso, echteEvents);
+    const { status, name, geteilt, variante, obenFarbe, untenFarbe } =
+      ermittleTagesDarstellung(iso, alleEvents, farbZuordnung);
     const istVergangen = datum < heute;
     const istAusgewaehlt =
       (state.start && iso === state.start) || (state.ende && iso === state.ende);
     const imBereich =
       state.start && state.ende && iso > state.start && iso < state.ende;
 
-    const klassen = ["tag", `tag--${status.toLowerCase()}`];
+    const klassen = ["tag"];
+    if (status === "FREI") {
+      klassen.push("tag--frei");
+    } else if (geteilt) {
+      klassen.push(`tag--${status.toLowerCase()}`, "tag--geteilt");
+    } else {
+      klassen.push(`tag--${status.toLowerCase()}-${variante === 1 ? "b" : "a"}`);
+    }
     if (istVergangen && status === "FREI") klassen.push("tag--vergangen");
     if (istAusgewaehlt) klassen.push("tag--ausgewaehlt");
     if (imBereich) klassen.push("tag--im-bereich");
 
     const klickbar = status === "FREI" && !istVergangen;
-    // Zeigt bevorzugt den Namen aus dem Event-Titel; nur wenn keiner
+    // Am Wechseltag (geteilt) bewusst kein Name -- welcher der beiden wäre
+    // irreführend, die Farbteilung sagt schon "hier wechselt die Buchung".
+    // Sonst bevorzugt der Name aus dem Event-Titel; nur wenn keiner
     // hinterlegt ist (z. B. MOCK_EVENTS ohne name-Feld), das generische Wort.
-    const label = name
+    const label = geteilt
+      ? ""
+      : name
       ? escapeHtml(name)
       : status === "BELEGT" ? t("calendar.booked") : status === "ANGEFRAGT" ? t("calendar.requested") : "";
 
+    const stil = geteilt
+      ? ` style="background: linear-gradient(135deg, ${obenFarbe} 0 50%, ${untenFarbe} 50% 100%);"`
+      : "";
+
     html += `
-      <button type="button" class="${klassen.join(" ")}" data-datum="${iso}" ${klickbar ? "" : "disabled"}>
+      <button type="button" class="${klassen.join(" ")}" data-datum="${iso}" ${klickbar ? "" : "disabled"}${stil}>
         <span class="tag-nummer">${tag}</span>
         ${label ? `<span class="tag-label">${label}</span>` : ""}
       </button>
@@ -224,6 +306,7 @@ async function renderKalender(hausKey, container) {
       <span class="legende-eintrag"><span class="legende-swatch legende-swatch--frei"></span>${t("calendar.free")}</span>
       <span class="legende-eintrag"><span class="legende-swatch legende-swatch--angefragt"></span>${t("calendar.requested")}</span>
       <span class="legende-eintrag"><span class="legende-swatch legende-swatch--belegt"></span>${t("calendar.booked")}</span>
+      <span class="legende-eintrag"><span class="legende-swatch legende-swatch--wechsel"></span>${t("calendar.turnover")}</span>
     </div>
   `;
 
