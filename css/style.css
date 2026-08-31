@@ -344,16 +344,19 @@ h1, h2 { line-height: 1.2; }
 
 .tag--leer { visibility: hidden; border: none; }
 
+/* Diese zwei unspezifischen Klassen werden inzwischen NUR noch zusammen mit
+   .tag--geteilt vergeben (siehe calendar.js) -- also bewusst KEIN
+   cursor:not-allowed hier, sonst übersteuert das die Wechseltag-Regel unten
+   auf JEDEM geteilten Feld, selbst wenn die freie Hälfte anklickbar ist.
+   .tag--geteilt[disabled] kümmert sich um den Cursor korrekt pro Tag. */
 .tag--angefragt {
   background: var(--farbe-angefragt);
   color: var(--farbe-angefragt-text);
-  cursor: not-allowed;
 }
 
 .tag--belegt {
   background: var(--farbe-kalender-belegt);
   color: var(--farbe-kalender-belegt-text);
-  cursor: not-allowed;
 }
 
 .tag--angefragt-a {
@@ -456,7 +459,7 @@ h1, h2 { line-height: 1.2; }
 }
 
 .legende-swatch--wechsel {
-  background: linear-gradient(90deg, var(--farbe-kalender-belegt-a) 0 50%, var(--farbe-kalender-belegt-b) 50% 100%);
+  background: linear-gradient(90deg, var(--farbe-kalender-belegt-a) 50%, var(--farbe-kalender-belegt-b) 50%);
   border-color: var(--farbe-kalender-belegt-text-b);
 }
 
