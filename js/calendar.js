@@ -171,11 +171,18 @@ const FARBE_VARIANTEN = {
 };
 
 // Wie ermittleTagesInfo(), liefert aber zusätzlich die Farbvariante (a/b) und
-// erkennt einen Wechseltag: eine Buchung endet genau an diesem Tag, eine
-// andere (mit demselben Status) beginnt am selben Tag -- typisch bei dichter
-// Belegung (Abreise + Anreise am selben Datum). An so einem Tag wird kein
-// Name gezeigt (welcher der beiden wäre schon irreführend), stattdessen wird
-// das Feld beim Rendern diagonal zwischen den beiden Buchungsfarben geteilt.
+// erkennt zwei Fälle, in denen der Tag nur zur Hälfte belegt ist -- passend
+// zur Wechseltag-Klickregel (nachmittagBelegt/vormittagBelegt) weiter oben:
+// (1) eine Buchung endet hier, eine andere beginnt hier -- typisch bei
+//     dichter Belegung (Abreise + Anreise am selben Datum). Beide Hälften
+//     zeigen die jeweilige Buchungsfarbe.
+// (2) nur EINE bestätigte Buchung berührt den Tag, aber genau an ihrem
+//     Rand (Anreise- oder Abreisetag) -- die freie Hälfte wird weiss
+//     dargestellt (wie ein normaler freier Tag), damit auf einen Blick
+//     erkennbar ist, dass hier noch eine neue Buchung anschliessen könnte.
+// In beiden Fällen wird kein Name gezeigt (welche Buchung wäre schon
+// irreführend), stattdessen wird das Feld beim Rendern links/rechts
+// zwischen den beiden Farben geteilt.
 function ermittleTagesDarstellung(isoDatum, alleEvents, farbZuordnung) {
   const amTag = alleEvents.filter((ev) => isoDatum >= ev.von && isoDatum <= ev.bis);
   const belegt = amTag.filter((ev) => ev.status === "BELEGT");
@@ -198,6 +205,22 @@ function ermittleTagesDarstellung(isoDatum, alleEvents, farbZuordnung) {
   }
 
   const ev = relevant[0];
+
+  // Nur eine (bestätigte) Buchung berührt den Tag, und zwar genau an ihrem
+  // Rand -- die andere Hälfte ist frei (weiss), noch niemand hat sie belegt.
+  if (status === "BELEGT" && relevant.length === 1) {
+    const frei = "var(--farbe-flaeche)";
+    const farbe = FARBE_VARIANTEN[status][farbZuordnung.get(ev) ?? 0];
+    if (ev.von === isoDatum && ev.bis !== isoDatum) {
+      // Anreisetag dieser Buchung: Vormittag frei, Nachmittag belegt.
+      return { status, geteilt: true, name: "", linksFarbe: frei, rechtsFarbe: farbe };
+    }
+    if (ev.bis === isoDatum && ev.von !== isoDatum) {
+      // Abreisetag dieser Buchung: Vormittag belegt, Nachmittag frei.
+      return { status, geteilt: true, name: "", linksFarbe: farbe, rechtsFarbe: frei };
+    }
+  }
+
   return {
     status,
     geteilt: false,
