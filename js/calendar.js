@@ -329,9 +329,22 @@ async function renderKalender(hausKey, container) {
     if (status === "FREI") {
       // bleibt wie gesetzt
     } else if (status === "BELEGT") {
-      klickbar =
-        klickbar &&
-        (zweiterKlickAusstehend ? !vormittagBelegt(alleEvents, iso) : !nachmittagBelegt(alleEvents, iso));
+      if (zweiterKlickAusstehend) {
+        // Während der Abreise-Auswahl (2. Klick) bleibt ein Tag auch dann
+        // klickbar, wenn er zwar nicht als Abreisetag taugt (Vormittag
+        // belegt), aber als KORREKTUR der schon gewählten Anreise gültig
+        // wäre -- also ein frührerer oder gleicher Tag, an dem der
+        // Nachmittag frei ist. tagAngeklickt() interpretiert einen Klick
+        // auf so einen Tag ohnehin automatisch als neue Anreise statt als
+        // Abreise (iso <= state.start), sonst müsste man erst zwanghaft
+        // einen Abreisetag fertig auswählen, um danach korrigieren zu
+        // können.
+        const alsAbreiseGueltig = !vormittagBelegt(alleEvents, iso);
+        const alsKorrekturDerAnreiseGueltig = iso <= state.start && !nachmittagBelegt(alleEvents, iso);
+        klickbar = klickbar && (alsAbreiseGueltig || alsKorrekturDerAnreiseGueltig);
+      } else {
+        klickbar = klickbar && !nachmittagBelegt(alleEvents, iso);
+      }
     } else {
       klickbar = false;
     }
